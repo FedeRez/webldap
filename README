@@ -1,0 +1,19 @@
+# Interface web de gestion des comptes FedeRez
+
+* Django 1.4 pour Wheezy (en backport Squeeze en attendant)
+* Pas de class-based views pour que ça soit plus simple à comprendre pour un
+  novice.
+* Pas d'authentification Django car on veut une màj du LDAP
+  (django-auth-ldap ne fait que lire le LDAP).
+* Pas de django-ldapdb parce que c'est d'une qualité douteuse
+* Pas de django-password-reset parce que ça repose trop sur l'auth Django
+* Impossible de garder la connexion LDAP active entre les requêtes (connection
+  pool)
+
+## Aborder le projet
+
+Le site "federez_ldap" ne contient qu'une seule app, "accounts", dédiée à la
+gestion des comptes ldap.
+
+accounts/
+  libldap.py: ensemble de fonction pour se connecter, lire et modifier le LDAP

@@ -1,0 +1,7 @@
+<h1>Profile</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% if uid %}
+<p>Welcome, <strong>{{ uid }}</strong>.</p>
+{% endif %}
