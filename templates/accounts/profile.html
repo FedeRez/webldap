@@ -2,6 +2,16 @@
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-{% if uid %}
-<p>Welcome, <strong>{{ uid }}</strong>.</p>
-{% endif %}
+<p>Name: {{ name }}</p>
+<p>Email: {{ email }}</p>
+<p>
+  Organizations:
+  <ul>
+  {% for org in orgs %}
+  <li>
+    {{ org.name }}
+    {% if org.owner %} | <a href="/org/{{ org.uid }}">Manage</a>{% endif %}
+  </li>
+  {% endfor %}
+  </ul>
+</p>

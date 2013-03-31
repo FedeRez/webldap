@@ -14,7 +14,7 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(path, login_url, redirect_field_name)
         try:
-            l = libldap.LibLDAPObject(request.session['ldap_uid'],
+            l = libldap.initialize(request.session['ldap_uid'],
                     request.session['ldap_password'])
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
@@ -34,11 +34,12 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
             try:
                 uid = f.cleaned_data['uid']
                 password = f.cleaned_data['password']
-                l = libldap.get_conn(uid, password)
-            except libldap.ConnectionError:
+                l = libldap.initialize(uid, password)
+            except libldap.InvalidCredentials:
                 error_msg = 'Invalid credentials'
+            except libldap.ConnectionError:
+                error_msg = 'Connection error'
             else:
-                l.unbind_s()
                 request.session['ldap_connected'] = True
                 request.session['ldap_uid'] = uid
                 request.session['ldap_password'] = password
@@ -53,5 +54,19 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
 
 @connect_ldap
 def profile(request, l):
-    (dn, entry) = l.lookupme()
-    return render_to_response('accounts/profile.html', { 'uid': entry['uid'][0] })
+    (me_dn, me) = l.me()
+    search = l.get('(member=%s)' % me_dn, prefix='ou=associations')
+
+    orgs = [{
+        'uid': org['uid'][0],
+        'name': org['o'][0],
+        'owner': me_dn in org['owner']
+        } for (org_dn, org) in search]
+
+    return render_to_response('accounts/profile.html',
+            {
+                'uid': me['uid'][0],
+                'name': me['cn'][0],
+                'email': me['mail'][0],
+                'orgs': orgs,
+            })
