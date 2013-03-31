@@ -1,5 +1,14 @@
 import ldap
 
+def get(dn, index):
+    return dn.split(',')[index]
+
+def paren(string):
+    return '(%s)' % string
+
+def build_filter(op, filters):
+    return '(%s%s)' % (op, ''.join(map(paren, filters)))
+
 class ConnectionError(Exception):
     pass
 

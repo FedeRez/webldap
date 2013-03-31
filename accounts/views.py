@@ -8,7 +8,7 @@ from forms import LoginForm
 
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
-    def _view(request):
+    def _view(request, *args, **kwargs):
         if not request.session.get('ldap_connected', False):
             path = request.get_full_path()
             from django.contrib.auth.views import redirect_to_login
@@ -18,7 +18,7 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
                     request.session['ldap_password'])
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
-        return view(request, l)
+        return view(request, l=l, *args, **kwargs)
     return _view
 
 def error(request, error_msg):
@@ -70,3 +70,17 @@ def profile(request, l):
                 'email': me['mail'][0],
                 'orgs': orgs,
             })
+
+@connect_ldap
+def org(request, l, uid):
+    (org_dn, org) = l.get('(uid=%s)' % uid, prefix='ou=associations')[0]
+    name = org['o'][0]
+    uids = map(lambda dn: libldap.get(dn, 0), org['member'])
+    search = l.get(libldap.build_filter('|', uids), prefix='ou=users')
+
+    members = [{
+        'name': member['cn'][0],
+        'owner': member_dn in org['owner']
+        } for (member_dn, member) in search]
+
+    return render_to_response('accounts/org.html', { 'name': name, 'members': members })
