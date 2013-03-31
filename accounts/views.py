@@ -24,9 +24,6 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
 def error(request, error_msg):
     return render_to_response('accounts/error.html', { 'error_msg': error_msg })
 
-def test(request):
-    return render_to_response('accounts/test.html')
-
 def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     error_msg = None
     redirect_to = request.REQUEST.get(redirect_field_name, '/profile')
