@@ -6,8 +6,6 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from accounts import libldap
 from forms import LoginForm
 
-import ldap
-
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
     def _view(request):
@@ -16,7 +14,7 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(path, login_url, redirect_field_name)
         try:
-            l = libldap.get_conn(request.session['ldap_uid'],
+            l = libldap.LibLDAPObject(request.session['ldap_uid'],
                     request.session['ldap_password'])
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
@@ -25,6 +23,9 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
 
 def error(request, error_msg):
     return render_to_response('accounts/error.html', { 'error_msg': error_msg })
+
+def test(request):
+    return render_to_response('accounts/test.html')
 
 def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     error_msg = None
@@ -55,7 +56,5 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
 
 @connect_ldap
 def profile(request, l):
-    (dn, entry) = l.search_s('dc=federez,dc=net', ldap.SCOPE_SUBTREE,
-            '(uid=bertrand.bonnefoy-claudet)')[0]
-
+    (dn, entry) = l.lookupme()
     return render_to_response('accounts/profile.html', { 'uid': entry['uid'][0] })
