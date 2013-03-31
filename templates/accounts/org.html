@@ -1,6 +1,10 @@
 <h1>Organization: {{ name }}</h1>
+{% if members %}
 <ul>
 {% for member in members %}
   <li>{{ member.name }}{% if member.owner %} (manager){% endif %}</li>
 {% endfor %}
 </ul>
+{% else %}
+<p>Empty organization.</p>
+{% endif %}

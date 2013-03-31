@@ -16,4 +16,4 @@ Le site "federez_ldap" ne contient qu'une seule app, "accounts", dédiée à la
 gestion des comptes ldap.
 
 accounts/
-  libldap.py: ensemble de fonction pour se connecter, lire et modifier le LDAP
+  libldap.py: ensemble de fonctions et classes pour lire et modifier le LDAP

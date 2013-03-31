@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from accounts import libldap
@@ -73,14 +73,22 @@ def profile(request, l):
 
 @connect_ldap
 def org(request, l, uid):
-    (org_dn, org) = l.get('(uid=%s)' % uid, prefix='ou=associations')[0]
-    name = org['o'][0]
-    uids = map(lambda dn: libldap.get(dn, 0), org['member'])
-    search = l.get(libldap.build_filter('|', uids), prefix='ou=users')
+    try:
+        (org_dn, org) = l.get('(uid=%s)' % uid, prefix='ou=associations')[0]
+    except IndexError:
+        raise Http404
 
-    members = [{
-        'name': member['cn'][0],
-        'owner': member_dn in org['owner']
-        } for (member_dn, member) in search]
+    name = org['o'][0]
+    try:
+        uids = map(lambda dn: libldap.get(dn, 0), org['member'])
+    except KeyError:
+        members = None
+    else:
+        search = l.get(libldap.build_filter('|', uids), prefix='ou=users')
+
+        members = [{
+            'name': member['cn'][0],
+            'owner': member_dn in org['owner']
+            } for (member_dn, member) in search]
 
     return render_to_response('accounts/org.html', { 'name': name, 'members': members })
