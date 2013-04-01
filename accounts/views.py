@@ -78,6 +78,9 @@ def org(request, l, uid):
     except IndexError:
         raise Http404
 
+    if l.binddn not in org['owner']:
+        return error(request, 'You\'re not the manager')
+
     name = org['o'][0]
     try:
         uids = map(lambda dn: libldap.get(dn, 0), org['member'])
