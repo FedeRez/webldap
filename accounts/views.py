@@ -60,7 +60,7 @@ def profile(request, l):
     orgs = [{
         'uid': org['uid'][0],
         'name': org['o'][0],
-        'owner': me_dn in org['owner']
+        'is_owner': me_dn in org['owner']
         } for (org_dn, org) in search]
 
     return render_to_response('accounts/profile.html',
