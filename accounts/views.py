@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from accounts import libldap
-from forms import LoginForm
+from accounts.forms import LoginForm
 
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
