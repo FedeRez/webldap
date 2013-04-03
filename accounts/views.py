@@ -4,7 +4,9 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from accounts import libldap
-from accounts.forms import LoginForm
+from accounts.forms import LoginForm, OrgAddForm
+
+import uuid
 
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
@@ -95,3 +97,37 @@ def org(request, l, uid):
             } for (member_dn, member) in search]
 
     return render_to_response('accounts/org.html', { 'name': name, 'members': members })
+
+@connect_ldap
+def org_add(request, l, uid):
+    error_msg = None
+    try:
+        (org_dn, org) = l.get('(uid=%s)' % uid, prefix='ou=associations')[0]
+    except IndexError:
+        raise Http404
+
+    if l.binddn not in org['owner']:
+        return error(request, 'You\'re not the manager')
+
+    name = org['o'][0]
+
+    if request.method == 'POST':
+        f = OrgAddForm(request.POST)
+        if f.is_valid():
+            token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
+
+            req = f.save(commit=False)
+            req.token = token
+            req.org_uid = uid
+            req.save()
+
+            # TODO: send email with activation link
+
+            return(HttpResponseRedirect('/org/%s' % uid))
+    else:
+        f = OrgAddForm()
+
+    c = { 'form': f, 'name': name, 'error_msg': error_msg, }
+    c.update(csrf(request))
+
+    return render_to_response('accounts/org_add.html', c)

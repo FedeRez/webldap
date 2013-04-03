@@ -9,6 +9,9 @@ def paren(string):
 def build_filter(op, filters):
     return '(%s%s)' % (op, ''.join(map(paren, filters)))
 
+def encode(string):
+    return string.encode('utf8')
+
 class ConnectionError(Exception):
     pass
 
@@ -48,6 +51,14 @@ class LibLDAPObject():
             base = ','.join([prefix, base])
         search = self.conn.search_s(base, ldap.SCOPE_SUBTREE, request)
         return search
+
+    def add(self, object_class, rdn_type, attrs, prefix=None):
+        base = self.base
+        if prefix:
+            base = ','.join([prefix, base])
+        dn = '%s=%s,%s' % (rdn_type, attrs[rdn_type][0], base)
+        modlist = [mod for mod in attrs.iteritems()]
+        self.conn.add_s(dn, modlist)
 
 def initialize(uid, passwd):
     return LibLDAPObject('uid=%s,ou=users,dc=federez,dc=net' % uid, passwd,
