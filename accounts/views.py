@@ -22,7 +22,7 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(path, login_url, redirect_field_name)
         try:
-            l = libldap.initialize(request.session['ldap_password'],
+            l = libldap.initialize(request.session['ldap_passwd'],
                     request.session['ldap_uid'])
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
@@ -41,8 +41,8 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
         if f.is_valid():
             try:
                 uid = f.cleaned_data['uid']
-                password = f.cleaned_data['password']
-                l = libldap.initialize(password, uid)
+                passwd = f.cleaned_data['passwd']
+                l = libldap.initialize(passwd, uid)
             except libldap.InvalidCredentials:
                 error_msg = 'Invalid credentials'
             except libldap.ConnectionError:
@@ -50,7 +50,7 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
             else:
                 request.session['ldap_connected'] = True
                 request.session['ldap_uid'] = uid
-                request.session['ldap_password'] = password
+                request.session['ldap_passwd'] = passwd
                 return HttpResponseRedirect(redirect_to)
     else:
         f = LoginForm()
