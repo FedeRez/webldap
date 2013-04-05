@@ -3,7 +3,7 @@ from accounts.models import AccountRequest
 
 class LoginForm(forms.Form):
     uid = forms.CharField(max_length=200)
-    password = forms.CharField(widget=forms.PasswordInput)
+    passwd = forms.CharField(widget=forms.PasswordInput)
 
 class OrgAddForm(forms.ModelForm):
     class Meta:
