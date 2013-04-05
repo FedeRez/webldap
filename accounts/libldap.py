@@ -1,4 +1,5 @@
 import ldap
+from federez_ldap import settings
 
 def get(dn, index):
     return dn.split(',')[index]
@@ -68,7 +69,7 @@ class LibLDAPObject():
         self.conn.add_s(dn, modlist)
 
 def initialize(passwd, uid=None):
-    base = 'dc=federez,dc=net'
+    base = settings.LDAP_BASE
     if uid:
         dn = 'uid=%s,ou=users,%s' % (uid, base)
     else:
