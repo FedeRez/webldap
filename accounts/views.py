@@ -1,10 +1,16 @@
-from django.shortcuts import render_to_response
+# coding=utf8
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template import Context, loader
 from django.core.context_processors import csrf
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.core.mail import send_mail
+from django.utils import timezone
 from accounts import libldap
-from accounts.forms import LoginForm, OrgAddForm
+from accounts.forms import LoginForm, OrgAddForm, AccountCreateForm
+from models import AccountRequest
+from federez_ldap import settings
 
 import uuid
 
@@ -16,8 +22,8 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(path, login_url, redirect_field_name)
         try:
-            l = libldap.initialize(request.session['ldap_uid'],
-                    request.session['ldap_password'])
+            l = libldap.initialize(request.session['ldap_password'],
+                    request.session['ldap_uid'])
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
         return view(request, l=l, *args, **kwargs)
@@ -36,7 +42,7 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
             try:
                 uid = f.cleaned_data['uid']
                 password = f.cleaned_data['password']
-                l = libldap.initialize(uid, password)
+                l = libldap.initialize(password, uid)
             except libldap.InvalidCredentials:
                 error_msg = 'Invalid credentials'
             except libldap.ConnectionError:
@@ -114,14 +120,20 @@ def org_add(request, l, uid):
     if request.method == 'POST':
         f = OrgAddForm(request.POST)
         if f.is_valid():
-            token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
-
             req = f.save(commit=False)
-            req.token = token
+            req.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
             req.org_uid = uid
             req.save()
 
-            # TODO: send email with activation link
+            t = loader.get_template('accounts/email_account_request')
+            c = Context({
+                    'name': req.name,
+                    'url': request.build_absolute_uri(
+                                     reverse(create, kwargs={ 'token': req.token })),
+                    'expire_in': '48 heures'
+                    })
+            send_mail(u'Création de compte FedeRez', t.render(c), 'bonnefo2@illinois.edu',
+                      [req.email], fail_silently=False)
 
             return(HttpResponseRedirect('/org/%s' % uid))
     else:
@@ -131,3 +143,28 @@ def org_add(request, l, uid):
     c.update(csrf(request))
 
     return render_to_response('accounts/org_add.html', c)
+
+def create(request, token):
+    valid_reqs = AccountRequest.objects.filter(expires_at__gt=timezone.now())
+    req = get_object_or_404(valid_reqs, token=token)
+    if request.method == 'POST':
+        f = AccountCreateForm(request.POST)
+        if f.is_valid():
+            l = libldap.initialize(passwd=settings.LDAP_ADMIN_PASSWD)
+            l.add('inetOrgPerson', 'uid',
+                  { 'objectClass': ['inetOrgPerson'],
+                    'uid': [req.uid],
+                    'cn': [req.name],
+                    'mail': [req.email],
+                    'sn': [f.cleaned_data['nick']],
+                    'userPassword': [libldap.ssha(f.cleaned_data['passwd'])]
+                  }, prefix='ou=users')
+            req.delete()
+            return HttpResponseRedirect('/profile')
+    else:
+        f = AccountCreateForm()
+
+    c = { 'form': f }
+    c.update(csrf(request))
+
+    return render_to_response('accounts/create.html', c)

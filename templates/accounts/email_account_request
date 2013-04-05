@@ -1,0 +1,13 @@
+{{ name }},
+
+Un administrateur a créé un compte pour cette adresse email. Suivez l'URL
+suivante pour finaliser la création.
+
+    {{ url }}
+
+Le lien expirera dans {{ expire_in }}. Pour tout problème, contactez les
+administrateurs.
+
+Cordialement,
+
+L'équipe technique de FedeRez <admin@federez.net>

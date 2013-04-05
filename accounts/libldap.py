@@ -12,6 +12,13 @@ def build_filter(op, filters):
 def encode(string):
     return string.encode('utf8')
 
+def ssha(passwd):
+    import base64, getpass, hashlib, os
+    passwd = encode(passwd)
+    salt = os.urandom(8) # edit the length as you see fit
+    return '{SSHA}%s' % base64.b64encode('%s%s' %
+           (hashlib.sha1('%s%s' % (passwd, salt)).digest(), salt))
+
 class ConnectionError(Exception):
     pass
 
@@ -56,12 +63,15 @@ class LibLDAPObject():
         base = self.base
         if prefix:
             base = ','.join([prefix, base])
-        dn = '%s=%s,%s' % (rdn_type, attrs[rdn_type][0], base)
-        modlist = [mod for mod in attrs.iteritems()]
+        dn = '%s=%s,%s' % (rdn_type, encode(attrs[rdn_type][0]), base)
+        modlist = [(k, map(encode, v)) for (k, v) in attrs.iteritems()]
         self.conn.add_s(dn, modlist)
 
-def initialize(uid, passwd):
-    return LibLDAPObject('uid=%s,ou=users,dc=federez,dc=net' % uid, passwd,
-            'dc=federez,dc=net',
-            'ldap://ldap.federez.net', True,
-            '/etc/ssl/certs/StartCom_Certification_Authority.pem')
+def initialize(passwd, uid=None):
+    base = 'dc=federez,dc=net'
+    if uid:
+        dn = 'uid=%s,ou=users,%s' % (uid, base)
+    else:
+        dn = 'cn=admin,%s' % base
+    return LibLDAPObject(dn, passwd, base, 'ldap://ldap.federez.net', True,
+                         '/etc/ssl/certs/StartCom_Certification_Authority.pem')

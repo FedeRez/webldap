@@ -9,3 +9,7 @@ class OrgAddForm(forms.ModelForm):
     class Meta:
         model = AccountRequest
         exclude = ('token', 'org_uid', 'created_at')
+
+class AccountCreateForm(forms.Form):
+    nick = forms.CharField(max_length=100)
+    passwd = forms.CharField(widget=forms.PasswordInput)
