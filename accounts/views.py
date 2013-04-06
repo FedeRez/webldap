@@ -159,6 +159,13 @@ def create(request, token):
                     'sn': [f.cleaned_data['nick']],
                     'userPassword': [libldap.ssha(f.cleaned_data['passwd'])]
                   }, prefix='ou=users')
+
+            if req.org_uid:
+                uid = 'uid=%s,ou=users,%s' % (req.uid, l.base)
+                l.set('uid=%s' % req.org_uid,
+                      add={ 'member': [uid] },
+                      prefix='ou=associations')
+
             req.delete()
             return HttpResponseRedirect('/profile')
     else:

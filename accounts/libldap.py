@@ -68,6 +68,17 @@ class LibLDAPObject():
         modlist = [(k, map(encode, v)) for (k, v) in attrs.iteritems()]
         self.conn.add_s(dn, modlist)
 
+    def set(self, rdn, add={}, replace={}, delete={}, prefix=None):
+        base = self.base
+        if prefix:
+            base = ','.join([prefix, base])
+        dn = ','.join([rdn, base])
+        adds = [(ldap.MOD_ADD, k, encode(v)) for k in add for v in add[k]]
+        replaces = [(ldap.MOD_REPLACE, k, encode(v)) for k in replace for v in replace[k]]
+        deletes = [(ldap.MOD_DELETE, k, encode(v)) for k in delete for v in delete[k]]
+        modlist = deletes + replaces + adds
+        self.conn.modify_s(dn, modlist)
+
 def initialize(passwd, uid=None):
     base = settings.LDAP_BASE
     if uid:
