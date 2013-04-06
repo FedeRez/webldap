@@ -3,12 +3,12 @@
 <html>
   <head>
     <title>{% block title %}{% endblock %}</title>
-    <link href="{% static "accounts/css/style.css" %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'accounts/css/style.css' %}" rel="stylesheet" media="screen" />
   </head>
   <body>
     <div id="all">
       <header>
-        <img id="logo" src="{% static "accounts/img/logo.png" %}" alt="Logo Federez"/>
+        <img id="logo" src="{% static 'accounts/img/logo.png' %}" alt="Logo Federez"/>
         <p>web<span id="hl">ldap</span></p>
       </header>
       <nav>
@@ -26,7 +26,6 @@
         </small>
       </footer>
       {% endblock %}
-      <script src="js/bootstrap.min.js"></script>
-    </div id="all">
+    </div>
   </body>
 </html>
