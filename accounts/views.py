@@ -24,6 +24,8 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
         try:
             l = libldap.initialize(request.session['ldap_passwd'],
                     request.session['ldap_uid'])
+        except libldap.InvalidCredentials:
+            return logout(request, redirect_field_name)
         except libldap.ConnectionError:
             return error(request, 'LDAP connection error')
         return view(request, l=l, *args, **kwargs)
@@ -59,6 +61,12 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     c.update(csrf(request))
 
     return render_to_response('accounts/login.html', c)
+
+def logout(request, redirect_field_name=REDIRECT_FIELD_NAME):
+    redirect_to = request.REQUEST.get(redirect_field_name, '/profile')
+    request.session.flush()
+
+    return HttpResponseRedirect(redirect_to)
 
 @connect_ldap
 def profile(request, l):
