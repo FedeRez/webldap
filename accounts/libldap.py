@@ -27,7 +27,14 @@ class InvalidCredentials(Exception):
     pass
 
 class LibLDAPObject():
+    """
+    Encapsulate an LDAP connection and major attributes, and provide wrappers
+    around the python-ldap library.
+    """
     def __init__(self, binddn, passwd, base, uri, starttls=False, cacert=None):
+        """
+        Create LDAP connection using python-ldap and cache major attributes.
+        """
         self.binddn = binddn
         self.base = base
         if cacert:
@@ -43,9 +50,11 @@ class LibLDAPObject():
             raise ConnectionError
 
     def me(self):
+        """Return self DN."""
         return self.conn.search_s(self.binddn, ldap.SCOPE_BASE, '(objectClass=*)')[0]
 
     def member_of(self, group):
+        """Determine whether bound user is in given group."""
         search = self.conn.search_s(self.base, ldap.SCOPE_SUBTREE,
             '(& (| (cn=%(group)s) \
                    (uid=%(group)s)) \
@@ -54,6 +63,11 @@ class LibLDAPObject():
         return search != []
 
     def get(self, request, prefix=None):
+        """
+        Perform a search with request as filter.
+
+        An optional prefix is prepended to the base.
+        """
         base = self.base
         if prefix:
             base = ','.join([prefix, base])
@@ -61,6 +75,13 @@ class LibLDAPObject():
         return search
 
     def add(self, object_class, rdn_type, attrs, prefix=None):
+        """
+        Add entry referenced by RDN and (prefixed) base with attrs as
+        attributes.
+
+        object_class must be present in attrs and values in the attrs
+        dictionary must only be lists.
+        """
         base = self.base
         if prefix:
             base = ','.join([prefix, base])
@@ -69,6 +90,12 @@ class LibLDAPObject():
         self.conn.add_s(dn, modlist)
 
     def set(self, rdn, add={}, replace={}, delete={}, prefix=None):
+        """
+        Set attributes of entry referenced by RDN and (prefixed) base.
+
+        add contains ADD operations, replace contains REPLACE operations
+        (equivalent to delete then add) and delete contains DELETE operations.
+        """
         base = self.base
         if prefix:
             base = ','.join([prefix, base])
@@ -80,6 +107,12 @@ class LibLDAPObject():
         self.conn.modify_s(dn, modlist)
 
 def initialize(passwd, uid=None):
+    """
+    Return LibLDAP connection container bound as a user using provided
+    credentials.
+
+    If no uid is given, then a special account is used.
+    """
     base = settings.LDAP_BASE
     if uid:
         dn = 'uid=%s,ou=users,%s' % (uid, base)
