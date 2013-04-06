@@ -12,8 +12,11 @@
         <p>web<span id="hl">ldap</span></p>
       </header>
       <nav>
-      {% if not loggedin %}<a href="/logout"><strong>déconnexion</strong></a> | {% endif %}
-      <a href="/help">aide</a>
+        {% if logged_in %}
+        <a href="/logout"><strong>déconnexion</strong> ({{ logged_uid }})</a> |
+        {% endif %}
+        <a href="/profile">accueil</a> |
+        <a href="/help">aide</a>
       </nav>
       <div id="content">
       {% block content %}{% endblock %}

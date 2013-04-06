@@ -157,4 +157,6 @@ LOGGING = {
     }
 }
 
+TEMPLATE_CONTEXT_PROCESSORS = ('accounts.views.session_info',)
+
 from settings_local import *

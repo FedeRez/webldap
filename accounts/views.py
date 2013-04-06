@@ -1,6 +1,6 @@
 # coding=utf8
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import Context, loader
+from django.template import RequestContext, loader
 from django.core.context_processors import csrf
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
@@ -13,6 +13,11 @@ from models import AccountRequest
 from federez_ldap import settings
 
 import uuid
+
+# Context processor
+def session_info(request):
+    return { 'logged_in': request.session.get('ldap_connected', False),
+             'logged_uid': request.session.get('ldap_uid', None) }
 
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
@@ -32,7 +37,8 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
     return _view
 
 def error(request, error_msg):
-    return render_to_response('accounts/error.html', { 'error_msg': error_msg })
+    return render_to_response('accounts/error.html', { 'error_msg': error_msg },
+                              context_instance=RequestContext(request))
 
 def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     error_msg = None
@@ -60,7 +66,8 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     c = { 'form': f, 'error_msg': error_msg, redirect_field_name: redirect_to }
     c.update(csrf(request))
 
-    return render_to_response('accounts/login.html', c)
+    return render_to_response('accounts/login.html', c,
+                              context_instance=RequestContext(request))
 
 def logout(request, redirect_field_name=REDIRECT_FIELD_NAME):
     redirect_to = request.REQUEST.get(redirect_field_name, '/profile')
@@ -92,7 +99,7 @@ def profile(request, l):
                 'email': me['mail'][0],
                 'orgs': orgs,
                 'groups': groups,
-            })
+            }, context_instance=RequestContext(request))
 
 @connect_ldap
 def org(request, l, uid):
@@ -117,7 +124,8 @@ def org(request, l, uid):
             'owner': member_dn in org['owner']
             } for (member_dn, member) in search]
 
-    return render_to_response('accounts/org.html', { 'name': name, 'members': members })
+    return render_to_response('accounts/org.html', { 'name': name, 'members': members },
+                              context_instance=RequestContext(request))
 
 @connect_ldap
 def org_add(request, l, uid):
@@ -141,7 +149,7 @@ def org_add(request, l, uid):
             req.save()
 
             t = loader.get_template('accounts/email_account_request')
-            c = Context({
+            c = RequestContext({
                     'name': req.name,
                     'url': request.build_absolute_uri(
                                      reverse(create, kwargs={ 'token': req.token })),
@@ -157,7 +165,8 @@ def org_add(request, l, uid):
     c = { 'form': f, 'name': name, 'error_msg': error_msg, }
     c.update(csrf(request))
 
-    return render_to_response('accounts/org_add.html', c)
+    return render_to_response('accounts/org_add.html', c,
+                              context_instance=RequestContext(request))
 
 def create(request, token):
     valid_reqs = AccountRequest.objects.filter(expires_at__gt=timezone.now())
@@ -193,7 +202,9 @@ def create(request, token):
     c = { 'form': f }
     c.update(csrf(request))
 
-    return render_to_response('accounts/create.html', c)
+    return render_to_response('accounts/create.html', c,
+                              context_instance=RequestContext(request))
 
 def help(request):
-    return render_to_response('accounts/help.html')
+    return render_to_response('accounts/help.html',
+                              context_instance=RequestContext(request))
