@@ -79,12 +79,19 @@ def profile(request, l):
         'is_owner': me_dn in org['owner']
         } for (org_dn, org) in search]
 
+    search = l.get('(member=%s)' % me_dn, prefix='ou=groups')
+
+    groups = [{
+        'name': group['cn'][0],
+        } for (group_dn, group) in search]
+
     return render_to_response('accounts/profile.html',
             {
                 'uid': me['uid'][0],
                 'name': me['cn'][0],
                 'email': me['mail'][0],
                 'orgs': orgs,
+                'groups': groups,
             })
 
 @connect_ldap

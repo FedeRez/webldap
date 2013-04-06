@@ -16,4 +16,14 @@
   {% endfor %}
   </ul>
 </p>
+<p>
+  <strong>Groupes :</strong>
+  <ul>
+    {% for group in groups %}
+    <li>
+    {{ group.name }}
+    </li>
+    {% endfor %}
+  </ul>
+</p>
 {% endblock %}
