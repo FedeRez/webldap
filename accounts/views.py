@@ -160,11 +160,15 @@ def create(request, token):
                     'userPassword': [libldap.ssha(f.cleaned_data['passwd'])]
                   }, prefix='ou=users')
 
+            uid = 'uid=%s,ou=users,%s' % (req.uid, l.base)
             if req.org_uid:
-                uid = 'uid=%s,ou=users,%s' % (req.uid, l.base)
                 l.set('uid=%s' % req.org_uid,
                       add={ 'member': [uid] },
                       prefix='ou=associations')
+            for group in settings.LDAP_DEFAULT_GROUPS:
+                l.set('cn=%s' % group,
+                      add={ 'member': [uid] },
+                      prefix='ou=groups')
 
             req.delete()
             return HttpResponseRedirect('/profile')
