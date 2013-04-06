@@ -1,0 +1,32 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "accounts/css/style.css" %}" rel="stylesheet" media="screen" />
+  </head>
+  <body>
+    <div id="all">
+      <header>
+        <img id="logo" src="{% static "accounts/img/logo.png" %}" alt="Logo Federez"/>
+        <p>web<span id="hl">ldap</span></p>
+      </header>
+      <nav>
+      {% if not loggedin %}<a href="/logout"><strong>déconnexion</strong></a> | {% endif %}
+      <a href="#">aide</a>
+      </nav>
+      <div id="content">
+      {% block content %}{% endblock %}
+      {% block footer %}
+      </div>
+      <footer>
+        <small>
+          Pour tout problème, contacter l'<a href="mailto:admin@federez.net">équipe
+          technique &lt;admin@federez.net&gt;</a>
+        </small>
+      </footer>
+      {% endblock %}
+      <script src="js/bootstrap.min.js"></script>
+    </div id="all">
+  </body>
+</html>

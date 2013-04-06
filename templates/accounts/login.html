@@ -1,10 +1,12 @@
-<h1>Login</h1>
-
+{% extends "accounts/base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<h1>Connexion</h1>
 {% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
-
 <form action="" method="post">
 {% csrf_token %}
 {{ form.as_p }}
-<input type="submit" value="Login" />
+<input type="submit" value="Connexion" />
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
+{% endblock %}

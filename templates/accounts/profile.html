@@ -1,17 +1,19 @@
-<h1>Profile</h1>
-
+{% extends "accounts/base.html" %}
+{% block title %}Identité{% endblock %}
+{% block content %}
+<h1>Identité</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<p>Name: {{ name }}</p>
-<p>Email: {{ email }}</p>
+<p><strong>Nom : </strong>{{ name }}</p>
+<p><strong>Email : </strong>{{ email }}</p>
 <p>
-  Organizations:
+  <strong>Associations :</strong>
   <ul>
   {% for org in orgs %}
   <li>
     {{ org.name }}
-    {% if org.is_owner %} | <a href="/org/{{ org.uid }}">Manage</a>{% endif %}
+    {% if org.is_owner %} | <a href="/org/{{ org.uid }}">gérer</a>{% endif %}
   </li>
   {% endfor %}
   </ul>
 </p>
+{% endblock %}

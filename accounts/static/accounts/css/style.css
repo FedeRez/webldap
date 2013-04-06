@@ -1,0 +1,84 @@
+html, body {
+  font-family: helvetica, sans;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  text-align: center;
+}
+
+#all {
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  max-width: 900px;
+  min-width: 500px;
+}
+
+header {
+  height: 130px;
+  margin: 0 1em;
+}
+
+header #logo {
+  float: left;
+}
+
+header p {
+  height: 130px;
+  margin: 0;
+  margin-left: 125px;
+  text-align: center;
+  line-height: 130px;
+  font-size: 30px;
+  overflow: hidden; // hides sitename when zooming
+}
+
+span#hl {
+  color: #54E;
+  font-family: mono;
+}
+
+nav {
+  float: right;
+  padding-right: 2em;
+  padding-bottom: .2em;
+  margin-bottom: 0;
+  font-size: .9em;
+  text-align: right
+}
+
+#content {
+  clear: both;
+  background: #E0F0FF;
+  border: solid 1px #99A;
+  border-radius: 1em;
+  text-align: left;
+  padding: .4em 1.3em 1em 1.3em;
+  box-shadow: 2px 2px 9px #AAA;
+}
+
+footer {
+  margin: .3em 0;
+}
+
+h1 {
+  font-size: 1.4em;
+  margin: .2em 0;
+}
+
+h2 {
+  font-size: 1.1em;
+  margin: 1em 0;
+}
+
+a {
+  text-decoration: none;
+  color: #46C;
+}
+
+a:hover {
+  color: #008;
+  text-decoration: underline;
+}

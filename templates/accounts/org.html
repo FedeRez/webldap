@@ -1,4 +1,11 @@
-<h1>Organization: {{ name }}</h1>
+{% extends "accounts/base.html" %}
+
+{% block title %}Association : {{ name }}{% endblock %}
+
+{% block content %}
+
+<h1>Association : {{ name }}</h1>
+<a href="add">ajouter un membre</a>
 {% if members %}
 <ul>
 {% for member in members %}
@@ -6,5 +13,8 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>Empty organization.</p>
+<p>Aucun membre.</p>
 {% endif %}
+<a href="/profile">retour</a>
+
+{% endblock %}
