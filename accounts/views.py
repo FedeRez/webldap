@@ -187,3 +187,6 @@ def create(request, token):
     c.update(csrf(request))
 
     return render_to_response('accounts/create.html', c)
+
+def help(request):
+    return render_to_response('accounts/help.html')

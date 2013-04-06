@@ -13,7 +13,7 @@
       </header>
       <nav>
       {% if not loggedin %}<a href="/logout"><strong>déconnexion</strong></a> | {% endif %}
-      <a href="#">aide</a>
+      <a href="/help">aide</a>
       </nav>
       <div id="content">
       {% block content %}{% endblock %}
