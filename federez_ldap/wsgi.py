@@ -13,8 +13,11 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+import sys
 import os
+from os.path import dirname
 
+sys.path.append(dirname(dirname(__file__)))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "federez_ldap.settings")
 
 # This application object is used by any WSGI server configured to use this
