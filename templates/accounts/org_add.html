@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Ajouter un membre à {{ name }}</h1>
 {% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
-<form action="" method="post">
+<form action="." method="post">
 {% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Envoyer" />
