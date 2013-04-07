@@ -82,3 +82,21 @@ a:hover {
   color: #008;
   text-decoration: underline;
 }
+
+input[type="text"], input[type="password"] {
+    color: #444;
+    border: solid 1px rgba(82, 168, 236, 0.8);
+    border-radius: 4px;
+    height: 1.4em;
+    width: 17em;
+    padding: .3em .5em;
+    box-shadow: 0 4px 1em rgba(0, 0, 0, 0.08) inset;
+}
+
+input:focus {
+    transition-duration: .2s;
+    transition-property: box-shadow;
+    transition-timing-function: cubic-bezier(0, 0, 1, 1), cubic-bezier(0, 0, 1, 1);
+    box-shadow: 0 4px 1em rgba(0, 0, 0, 0.08) inset,
+                0 0 .4em 0 rgba(82, 168, 236, 0.6);
+}
