@@ -32,7 +32,7 @@ header p {
   text-align: center;
   line-height: 130px;
   font-size: 30px;
-  overflow: hidden; // hides sitename when zooming
+  overflow: hidden; /* hides sitename when zooming */
 }
 
 span#hl {
