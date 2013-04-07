@@ -42,7 +42,7 @@ def error(request, error_msg):
 
 def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     error_msg = None
-    redirect_to = request.REQUEST.get(redirect_field_name, '/profile')
+    redirect_to = request.REQUEST.get(redirect_field_name, '/')
 
     if request.method == 'POST':
         f = LoginForm(request.POST)
@@ -70,7 +70,7 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
                               context_instance=RequestContext(request))
 
 def logout(request, redirect_field_name=REDIRECT_FIELD_NAME):
-    redirect_to = request.REQUEST.get(redirect_field_name, '/profile')
+    redirect_to = request.REQUEST.get(redirect_field_name, '/')
     request.session.flush()
 
     return HttpResponseRedirect(redirect_to)
@@ -195,7 +195,7 @@ def create(request, token):
                       prefix='ou=groups')
 
             req.delete()
-            return HttpResponseRedirect('/profile')
+            return HttpResponseRedirect('/')
     else:
         f = AccountCreateForm()
 
