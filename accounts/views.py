@@ -1,6 +1,6 @@
 # coding=utf8
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, loader
+from django.template import Context, RequestContext, loader
 from django.core.context_processors import csrf
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
@@ -149,7 +149,7 @@ def org_add(request, l, uid):
             req.save()
 
             t = loader.get_template('accounts/email_account_request')
-            c = RequestContext({
+            c = Context({
                     'name': req.name,
                     'url': request.build_absolute_uri(
                                      reverse(create, kwargs={ 'token': req.token })),
