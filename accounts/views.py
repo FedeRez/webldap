@@ -96,6 +96,7 @@ def profile(request, l):
             {
                 'uid': me['uid'][0],
                 'name': me['cn'][0],
+                'nick': me['sn'][0],
                 'email': me['mail'][0],
                 'orgs': orgs,
                 'groups': groups,
