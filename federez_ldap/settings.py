@@ -1,8 +1,5 @@
 # Django settings for federez_ldap project.
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
     ('Bertrand Bonnefoy-Claudet', 'bertrandbc@gmail.com')
@@ -105,13 +102,6 @@ ROOT_URLCONF = 'federez_ldap.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'federez_ldap.wsgi.application'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    '/home/bertrand/web/federez_ldap/templates'
-)
 
 INSTALLED_APPS = (
     #'django.contrib.auth',
