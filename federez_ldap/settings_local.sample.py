@@ -35,8 +35,11 @@ EMAIL_FROM = 'userhelp@example.org'
 # LDAP base
 LDAP_BASE = 'dc=example,dc=org'
 
-# LDAP application user password
-LDAP_ADMIN_PASSWD = 'secret'
+# LDAP application uid (without base)
+LDAP_WEBLDAP_USER = 'uid=webldap,ou=apps'
+
+# LDAP application password
+LDAP_WEBLDAP_PASSWD = 'secret'
 
 # Default LDAP groups for created users
 LDAP_DEFAULT_GROUPS = ['wiki']

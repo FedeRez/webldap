@@ -117,6 +117,6 @@ def initialize(passwd, uid=None):
     if uid:
         dn = 'uid=%s,ou=users,%s' % (uid, base)
     else:
-        dn = 'cn=admin,%s' % base
+        dn = ','.join([settings.LDAP_WEBLDAP_USER, base])
     return LibLDAPObject(dn, passwd, base, 'ldap://ldap.federez.net', True,
                          '/etc/ssl/certs/StartCom_Certification_Authority.pem')

@@ -174,7 +174,7 @@ def create(request, token):
     if request.method == 'POST':
         f = AccountCreateForm(request.POST)
         if f.is_valid():
-            l = libldap.initialize(passwd=settings.LDAP_ADMIN_PASSWD)
+            l = libldap.initialize(passwd=settings.LDAP_WEBLDAP_PASSWD)
             l.add('inetOrgPerson', 'uid',
                   { 'objectClass': ['inetOrgPerson'],
                     'uid': [req.uid],
