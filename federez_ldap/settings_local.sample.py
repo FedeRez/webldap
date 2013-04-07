@@ -36,7 +36,7 @@ EMAIL_FROM = 'userhelp@example.org'
 LDAP_BASE = 'dc=example,dc=org'
 
 # LDAP application user password
-LDAP_ADMIN_PASSWD = 'obvrajtz'
+LDAP_ADMIN_PASSWD = 'secret'
 
 # Default LDAP groups for created users
 LDAP_DEFAULT_GROUPS = ['wiki']
