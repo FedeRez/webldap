@@ -155,7 +155,7 @@ def org_add(request, l, uid):
                                      reverse(create, kwargs={ 'token': req.token })),
                     'expire_in': '48 heures'
                     })
-            send_mail(u'Création de compte FedeRez', t.render(c), 'bonnefo2@illinois.edu',
+            send_mail(u'Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
                       [req.email], fail_silently=False)
 
             return(HttpResponseRedirect('/org/%s' % uid))

@@ -29,6 +29,9 @@ TEMPLATE_DIRS = (
 EMAIL_HOST = 'incoming-relays.illinois.edu'
 EMAIL_PORT = 25
 
+# Address to appear in From field
+EMAIL_FROM = 'userhelp@example.org'
+
 # LDAP base
 LDAP_BASE = 'dc=example,dc=org'
 
