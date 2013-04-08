@@ -3,7 +3,12 @@ from django.utils import timezone
 
 import datetime
 
-class AccountRequest(models.Model):
+class Request(models.Model):
+    ACCOUNT = 'AC'
+    TYPE_CHOICES = (
+        (ACCOUNT, 'Compte'),
+    )
+    type = models.CharField(max_length=2, choices=TYPE_CHOICES)
     token = models.CharField(max_length=32)
     uid = models.CharField(max_length=200)
     email = models.EmailField(max_length=254)
@@ -14,4 +19,4 @@ class AccountRequest(models.Model):
 
     def save(self):
         self.expires_at = timezone.now() + datetime.timedelta(days=2)
-        super(AccountRequest, self).save()
+        super(Request, self).save()

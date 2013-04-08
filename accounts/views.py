@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from accounts import libldap
 from accounts.forms import LoginForm, OrgAddForm, AccountCreateForm
-from models import AccountRequest
+from models import Request
 from federez_ldap import settings
 
 import uuid
@@ -147,6 +147,7 @@ def org_add(request, l, uid):
             req = f.save(commit=False)
             req.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
             req.org_uid = uid
+            req.type = Request.ACCOUNT
             req.save()
 
             t = loader.get_template('accounts/email_account_request')
@@ -170,8 +171,15 @@ def org_add(request, l, uid):
                               context_instance=RequestContext(request))
 
 def create(request, token):
-    valid_reqs = AccountRequest.objects.filter(expires_at__gt=timezone.now())
+    valid_reqs = Request.objects.filter(expires_at__gt=timezone.now())
     req = get_object_or_404(valid_reqs, token=token)
+
+    if req.type == Request.ACCOUNT:
+        return process_account(request, req)
+    else:
+        return error(request, 'Entrée incorrecte, contactez un admin')
+
+def process_account(request, req):
     if request.method == 'POST':
         f = AccountCreateForm(request.POST)
         if f.is_valid():
