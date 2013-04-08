@@ -2,7 +2,8 @@ from django import forms
 from accounts.models import Request
 
 class LoginForm(forms.Form):
-    uid = forms.CharField(max_length=200)
+    uid = forms.CharField(max_length=200,
+                          widget=forms.TextInput(attrs={ 'placeholder': 'prenom.nom' }))
     passwd = forms.CharField(widget=forms.PasswordInput)
 
 class RequestAccountForm(forms.ModelForm):
