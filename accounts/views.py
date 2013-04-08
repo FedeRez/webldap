@@ -154,7 +154,7 @@ def org_add(request, l, uid):
             c = Context({
                     'name': req.name,
                     'url': request.build_absolute_uri(
-                                     reverse(create, kwargs={ 'token': req.token })),
+                                     reverse(process, kwargs={ 'token': req.token })),
                     'expire_in': '48 heures'
                     })
             send_mail(u'Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
@@ -170,7 +170,7 @@ def org_add(request, l, uid):
     return render_to_response('accounts/org_add.html', c,
                               context_instance=RequestContext(request))
 
-def create(request, token):
+def process(request, token):
     valid_reqs = Request.objects.filter(expires_at__gt=timezone.now())
     req = get_object_or_404(valid_reqs, token=token)
 
@@ -211,7 +211,7 @@ def process_account(request, req):
     c = { 'form': f }
     c.update(csrf(request))
 
-    return render_to_response('accounts/create.html', c,
+    return render_to_response('accounts/process_account.html', c,
                               context_instance=RequestContext(request))
 
 def help(request):
