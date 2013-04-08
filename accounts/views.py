@@ -60,7 +60,7 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
                 request.session['ldap_passwd'] = passwd
                 return HttpResponseRedirect(redirect_to)
     else:
-        f = LoginForm()
+        f = LoginForm(label_suffix='')
 
     c = { 'form': f, 'error_msg': error_msg, redirect_field_name: redirect_to }
     c.update(csrf(request))
@@ -160,7 +160,7 @@ def org_add(request, l, uid):
 
             return(HttpResponseRedirect('/org/%s' % uid))
     else:
-        f = RequestAccountForm()
+        f = RequestAccountForm(label_suffix='')
 
     c = { 'form': f, 'name': name, 'error_msg': error_msg, }
     c.update(csrf(request))
@@ -194,7 +194,7 @@ def passwd(request):
                           settings.EMAIL_FROM, [req.email], fail_silently=False)
                 return HttpResponseRedirect('/')
     else:
-        f = RequestPasswdForm()
+        f = RequestPasswdForm(label_suffix='')
 
     c = { 'form': f, 'error_msg': error_msg, }
     c.update(csrf(request))
@@ -240,7 +240,7 @@ def process_account(request, req):
             req.delete()
             return HttpResponseRedirect('/')
     else:
-        f = ProcessAccountForm()
+        f = ProcessAccountForm(label_suffix='')
 
     c = { 'form': f }
     c.update(csrf(request))
@@ -260,7 +260,7 @@ def process_passwd(request, req):
             req.delete()
             return HttpResponseRedirect('/')
     else:
-        f = ProcessPasswdForm()
+        f = ProcessPasswdForm(label_suffix='')
 
     c = { 'form': f }
     c.update(csrf(request))

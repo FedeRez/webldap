@@ -4,8 +4,15 @@
 <h1>Ajouter un membre à {{ name }}</h1>
 {% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
 <form action="." method="post">
-{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Envoyer" />
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" value="Envoyer" />
+      </td>
+    </tr>
+  <table>
 </form>
 {% endblock %}

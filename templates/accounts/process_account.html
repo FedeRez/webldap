@@ -3,8 +3,15 @@
 {% block content %}
 <h1>Activer un compte</h1>
 <form action="." method="post">
-{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Activer" />
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" value="Activer" />
+      </td>
+    </tr>
+  </table>
 </form>
 {% endblock %}
