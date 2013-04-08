@@ -1,30 +1,27 @@
 {% extends "accounts/base.html" %}
 {% block title %}Identité{% endblock %}
 {% block content %}
-<h1>Identité</h1>
+<h1>Accueil</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-<p><strong>Nom : </strong>{{ name }}</p>
-<p><strong>Pseudo : </strong>{{ nick }}</p>
-<p><strong>Email : </strong>{{ email }}</p>
-<p>
-  <strong>Associations :</strong>
-  <ul>
+<h2>Identité</h2>
+<p class="user_data"><strong>Nom : </strong>{{ name }}</p>
+<p class="user_data"><strong>Pseudo : </strong>{{ nick }}</p>
+<p class="user_data"><strong>Email : </strong>{{ email }}</p>
+<h2>Associations</h2>
+<ul>
   {% for org in orgs %}
   <li>
     {{ org.name }}
     {% if org.is_owner %} | <a href="/org/{{ org.uid }}">gérer</a>{% endif %}
   </li>
   {% endfor %}
-  </ul>
-</p>
-<p>
-  <strong>Groupes :</strong>
-  <ul>
-    {% for group in groups %}
-    <li>
+</ul>
+<h2>Groupes</h2>
+<ul>
+  {% for group in groups %}
+  <li>
     {{ group.name }}
-    </li>
-    {% endfor %}
-  </ul>
-</p>
+  </li>
+  {% endfor %}
+</ul>
 {% endblock %}

@@ -73,6 +73,10 @@ h2 {
   margin: 1em 0;
 }
 
+p.user_data {
+  margin: .2em .5em;
+}
+
 a {
   text-decoration: none;
   color: #46C;
