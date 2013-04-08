@@ -8,7 +8,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.mail import send_mail
 from django.utils import timezone
 from accounts import libldap
-from accounts.forms import LoginForm, OrgAddForm, AccountCreateForm
+from accounts.forms import LoginForm, RequestAccountForm, ProcessAccountForm
 from models import Request
 from federez_ldap import settings
 
@@ -142,7 +142,7 @@ def org_add(request, l, uid):
     name = org['o'][0]
 
     if request.method == 'POST':
-        f = OrgAddForm(request.POST)
+        f = RequestAccountForm(request.POST)
         if f.is_valid():
             req = f.save(commit=False)
             req.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
@@ -162,7 +162,7 @@ def org_add(request, l, uid):
 
             return(HttpResponseRedirect('/org/%s' % uid))
     else:
-        f = OrgAddForm()
+        f = RequestAccountForm()
 
     c = { 'form': f, 'name': name, 'error_msg': error_msg, }
     c.update(csrf(request))
@@ -181,7 +181,7 @@ def process(request, token):
 
 def process_account(request, req):
     if request.method == 'POST':
-        f = AccountCreateForm(request.POST)
+        f = ProcessAccountForm(request.POST)
         if f.is_valid():
             l = libldap.initialize(passwd=settings.LDAP_WEBLDAP_PASSWD)
             l.add('inetOrgPerson', 'uid',
@@ -206,7 +206,7 @@ def process_account(request, req):
             req.delete()
             return HttpResponseRedirect('/')
     else:
-        f = AccountCreateForm()
+        f = ProcessAccountForm()
 
     c = { 'form': f }
     c.update(csrf(request))
