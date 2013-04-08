@@ -5,8 +5,10 @@ import datetime, uuid
 
 class Request(models.Model):
     ACCOUNT = 'AC'
+    PASSWD = 'PW'
     TYPE_CHOICES = (
         (ACCOUNT, 'Compte'),
+        (PASSWD, 'Mot de passe'),
     )
     type = models.CharField(max_length=2, choices=TYPE_CHOICES)
     token = models.CharField(max_length=32)

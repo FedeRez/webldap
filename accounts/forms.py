@@ -10,6 +10,14 @@ class RequestAccountForm(forms.ModelForm):
         model = Request
         fields = ('uid', 'email', 'name')
 
+class RequestPasswdForm(forms.ModelForm):
+    class Meta:
+        model = Request
+        fields = ('uid', 'email')
+
 class ProcessAccountForm(forms.Form):
     nick = forms.CharField(max_length=100)
+    passwd = forms.CharField(widget=forms.PasswordInput)
+
+class ProcessPasswdForm(forms.Form):
     passwd = forms.CharField(widget=forms.PasswordInput)

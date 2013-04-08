@@ -1,0 +1,10 @@
+{% extends "accounts/base.html" %}
+{% block title %}Nouveau mot de passe{% endblock %}
+{% block content %}
+<h1>Nouveau mot de passe</h1>
+<form action="." method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Enregistrer" />
+</form>
+{% endblock %}

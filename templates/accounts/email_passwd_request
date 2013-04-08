@@ -1,0 +1,11 @@
+{{ name }},
+
+Vous avez apparemment demandé à changer votre mot de passe suite à un oubli.
+Suivez l'URL suivante pour continuer ou contactez les administrateurs si vous
+n'êtes pas à l'origine de cette requête.
+
+    {{ url }}
+
+Cordialement,
+
+L'équipe technique de FedeRez <admin@federez.net>

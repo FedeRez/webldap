@@ -8,7 +8,8 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.mail import send_mail
 from django.utils import timezone
 from accounts import libldap
-from accounts.forms import LoginForm, RequestAccountForm, ProcessAccountForm
+from accounts.forms import (LoginForm, RequestAccountForm, RequestPasswdForm,
+                            ProcessAccountForm, ProcessPasswdForm)
 from models import Request
 from federez_ldap import settings
 
@@ -167,12 +168,48 @@ def org_add(request, l, uid):
     return render_to_response('accounts/org_add.html', c,
                               context_instance=RequestContext(request))
 
+def passwd(request):
+    error_msg = None
+    if request.method == 'POST':
+        f = RequestPasswdForm(request.POST)
+        if f.is_valid():
+            req = f.save(commit=False)
+            l = libldap.initialize(passwd=settings.LDAP_WEBLDAP_PASSWD)
+            try:
+                (user_dn, user) = l.get('(&(uid=%s)(mail=%s))' % (req.uid, req.email),
+                                        prefix='ou=users')[0]
+            except IndexError:
+                error_msg = 'Données incorrectes'
+            else:
+                req.type = Request.PASSWD
+                req.save()
+
+                t = loader.get_template('accounts/email_passwd_request')
+                c = Context({
+                    'name': user['cn'][0],
+                    'url': request.build_absolute_uri(
+                                     reverse(process, kwargs={ 'token': req.token })),
+                    })
+                send_mail(u'Changement de mot de passe FedeRez', t.render(c),
+                          settings.EMAIL_FROM, [req.email], fail_silently=False)
+                return HttpResponseRedirect('/')
+    else:
+        f = RequestPasswdForm()
+
+    c = { 'form': f, 'error_msg': error_msg, }
+    c.update(csrf(request))
+
+    return render_to_response('accounts/passwd.html', c,
+                                  context_instance=RequestContext(request))
+
 def process(request, token):
     valid_reqs = Request.objects.filter(expires_at__gt=timezone.now())
     req = get_object_or_404(valid_reqs, token=token)
 
     if req.type == Request.ACCOUNT:
         return process_account(request, req)
+    elif req.type == Request.PASSWD:
+        return process_passwd(request, req)
     else:
         return error(request, 'Entrée incorrecte, contactez un admin')
 
@@ -209,6 +246,26 @@ def process_account(request, req):
     c.update(csrf(request))
 
     return render_to_response('accounts/process_account.html', c,
+                              context_instance=RequestContext(request))
+
+def process_passwd(request, req):
+    if request.method == 'POST':
+        f = ProcessPasswdForm(request.POST)
+        if f.is_valid():
+            l = libldap.initialize(passwd=settings.LDAP_WEBLDAP_PASSWD)
+            l.set('uid=%s' % req.uid,
+                  replace={ 'userPassword': [libldap.ssha(f.cleaned_data['passwd'])] },
+                  prefix='ou=users')
+
+            req.delete()
+            return HttpResponseRedirect('/')
+    else:
+        f = ProcessPasswdForm()
+
+    c = { 'form': f }
+    c.update(csrf(request))
+
+    return render_to_response('accounts/process_passwd.html', c,
                               context_instance=RequestContext(request))
 
 def help(request):
