@@ -15,10 +15,11 @@ class Request(models.Model):
     name = models.CharField(max_length=200)
     org_uid = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    expires_at = models.DateTimeField(editable=False)
+    expires_at = models.DateTimeField()
 
     def save(self):
-        self.expires_at = timezone.now() + datetime.timedelta(days=2)
+        if not self.expires_at:
+            self.expires_at = timezone.now() + datetime.timedelta(days=2)
         if not self.token:
             self.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
         super(Request, self).save()
