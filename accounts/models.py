@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-import datetime
+import datetime, uuid
 
 class Request(models.Model):
     ACCOUNT = 'AC'
@@ -19,4 +19,6 @@ class Request(models.Model):
 
     def save(self):
         self.expires_at = timezone.now() + datetime.timedelta(days=2)
+        if not self.token:
+            self.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
         super(Request, self).save()

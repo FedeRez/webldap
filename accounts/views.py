@@ -12,8 +12,6 @@ from accounts.forms import LoginForm, RequestAccountForm, ProcessAccountForm
 from models import Request
 from federez_ldap import settings
 
-import uuid
-
 # Context processor
 def session_info(request):
     return { 'logged_in': request.session.get('ldap_connected', False),
@@ -145,7 +143,6 @@ def org_add(request, l, uid):
         f = RequestAccountForm(request.POST)
         if f.is_valid():
             req = f.save(commit=False)
-            req.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
             req.org_uid = uid
             req.type = Request.ACCOUNT
             req.save()
