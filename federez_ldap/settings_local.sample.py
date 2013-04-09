@@ -32,6 +32,15 @@ EMAIL_PORT = 25
 # Address to appear in From field
 EMAIL_FROM = 'userhelp@example.org'
 
+# LDAP URI (protocol and address)
+LDAP_URI = 'ldap://ldap.example.org'
+
+# Whether to use STARTTLS or not
+LDAP_STARTTLS = False
+
+# Certificate to be used with LDAPS or STARTTLS
+LDAP_CACERT = ''
+
 # LDAP base
 LDAP_BASE = 'dc=example,dc=org'
 
