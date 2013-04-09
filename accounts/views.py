@@ -8,7 +8,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.mail import send_mail
 from django.utils import timezone
 from accounts import libldap
-from accounts.forms import (LoginForm, RequestAccountForm, RequestPasswdForm,
+from accounts.forms import (LoginForm, ProfileForm, RequestAccountForm, RequestPasswdForm,
                             ProcessAccountForm, ProcessPasswdForm)
 from models import Request
 from federez_ldap import settings
@@ -68,8 +68,8 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     return render_to_response('accounts/login.html', c,
                               context_instance=RequestContext(request))
 
-def logout(request, redirect_field_name=REDIRECT_FIELD_NAME):
-    redirect_to = request.REQUEST.get(redirect_field_name, '/')
+def logout(request, redirect_field_name=REDIRECT_FIELD_NAME, next=None):
+    redirect_to = next or request.REQUEST.get(redirect_field_name, '/')
     request.session.flush()
 
     return HttpResponseRedirect(redirect_to)
@@ -100,6 +100,63 @@ def profile(request, l):
                 'orgs': orgs,
                 'groups': groups,
             }, context_instance=RequestContext(request))
+
+@connect_ldap
+def profile_edit(request, l):
+    error_msg = None
+    (me_dn, me) = l.me()
+
+    if request.method == 'POST':
+        f = ProfileForm(request.POST)
+        if f.is_valid():
+            name_new = f.cleaned_data['name']
+            email_new = f.cleaned_data['email']
+            nick_new = f.cleaned_data['nick']
+            passwd_new = f.cleaned_data['passwd']
+            modlist = {}
+
+            if name_new != me['cn'][0]:
+                modlist.update({'cn': [name_new]})
+            if nick_new != me['sn'][0]:
+                modlist.update({'sn': [nick_new]})
+            if passwd_new:
+                modlist.update({'userPassword': [passwd_new]})
+
+            l.set('uid=%s' % me['uid'][0], replace=modlist, prefix='ou=users')
+
+            if email_new != me['mail'][0]:
+                req = Request()
+                req.type = Request.EMAIL
+                req.uid = me['uid'][0]
+                req.email = email_new
+                req.save()
+
+                t = loader.get_template('accounts/email_email_request')
+                c = Context({
+                        'name': me['cn'][0],
+                        'url': request.build_absolute_uri(
+                                         reverse(process, kwargs={ 'token': req.token })),
+                        'expire_in': '48 heures'
+                        })
+                send_mail(u'Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
+                          [req.email], fail_silently=False)
+
+            return HttpResponseRedirect('/')
+
+    else:
+        f = ProfileForm(label_suffix='', initial={ 'email': me['mail'][0],
+                                                   'name': me['cn'][0],
+                                                   'nick': me['sn'][0] })
+
+    c = { 'form': f,
+          'name': me['cn'][0],
+          'nick': me['sn'][0],
+          'email': me['mail'][0],
+          'error_msg': error_msg, }
+    c.update(csrf(request))
+
+    return render_to_response('accounts/edit.html', c,
+                              context_instance=RequestContext(request))
 
 @connect_ldap
 def org(request, l, uid):
@@ -210,6 +267,8 @@ def process(request, token):
         return process_account(request, req)
     elif req.type == Request.PASSWD:
         return process_passwd(request, req)
+    elif req.type == Request.EMAIL:
+        return process_email(request, req=req)
     else:
         return error(request, 'Entrée incorrecte, contactez un admin')
 
@@ -267,6 +326,15 @@ def process_passwd(request, req):
 
     return render_to_response('accounts/process_passwd.html', c,
                               context_instance=RequestContext(request))
+
+@connect_ldap
+def process_email(request, l, req):
+    # User who requested email change must be logged in
+    if l.binddn != 'uid=%s,ou=users,%s' % (req.uid, l.base):
+        logout(request, next=reverse(process, kwargs={ 'token': req.token }))
+    l.set('uid=%s' % req.uid, replace={ 'mail': [req.email] }, prefix='ou=users')
+    req.delete()
+    return HttpResponseRedirect('/')
 
 def help(request):
     return render_to_response('accounts/help.html',
