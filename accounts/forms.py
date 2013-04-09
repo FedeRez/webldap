@@ -47,8 +47,6 @@ class RequestPasswdForm(forms.ModelForm):
 class ProcessAccountForm(forms.Form):
     nick = nick_field()
     passwd = passwd_field()
-    class Meta:
-        fields = ('nick', 'passwd')
 
 class ProcessPasswdForm(forms.Form):
     passwd = passwd_field()
