@@ -51,9 +51,9 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
                 passwd = f.cleaned_data['passwd']
                 l = libldap.initialize(passwd, uid)
             except libldap.InvalidCredentials:
-                error_msg = 'Invalid credentials'
+                error_msg = 'Identifiants incorrects'
             except libldap.ConnectionError:
-                error_msg = 'Connection error'
+                error_msg = 'Erreur de connexion'
             else:
                 request.session['ldap_connected'] = True
                 request.session['ldap_uid'] = uid
@@ -193,7 +193,7 @@ def org_add(request, l, uid):
         raise Http404
 
     if l.binddn not in org['owner']:
-        return error(request, 'You\'re not the manager')
+        return error(request, 'Vous n\'êtes pas gérant.')
 
     name = org['o'][0]
 
