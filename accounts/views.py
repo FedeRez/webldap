@@ -219,7 +219,7 @@ def org_add(request, l, uid):
     else:
         f = RequestAccountForm(label_suffix='')
 
-    c = { 'form': f, 'name': name, 'error_msg': error_msg, }
+    c = { 'form': f, 'name': name, 'uid': uid, 'error_msg': error_msg }
     c.update(csrf(request))
 
     return render_to_response('accounts/org_add.html', c,
