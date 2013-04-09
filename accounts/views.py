@@ -246,6 +246,7 @@ def passwd(request):
                     'name': user['cn'][0],
                     'url': request.build_absolute_uri(
                                      reverse(process, kwargs={ 'token': req.token })),
+                    'expire_in': '48 heures',
                     })
                 send_mail(u'Changement de mot de passe FedeRez', t.render(c),
                           settings.EMAIL_FROM, [req.email], fail_silently=False)

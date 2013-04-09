@@ -6,6 +6,8 @@ n'êtes pas à l'origine de cette requête.
 
     {{ url }}
 
+Ce lien expirera dans {{ expire_in }}.
+
 Cordialement,
 
 L'équipe technique de FedeRez <admin@federez.net>
