@@ -215,7 +215,7 @@ def org_add(request, l, uid):
             send_mail(u'Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
                       [req.email], fail_silently=False)
 
-            return(HttpResponseRedirect('/org/%s' % uid))
+            return HttpResponseRedirect('/org/%s' % uid)
     else:
         f = RequestAccountForm(label_suffix='')
 
