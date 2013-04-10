@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from federez_ldap import settings
 
 import datetime, uuid
 
@@ -23,7 +24,8 @@ class Request(models.Model):
 
     def save(self):
         if not self.expires_at:
-            self.expires_at = timezone.now() + datetime.timedelta(days=2)
+            self.expires_at = timezone.now() \
+                            + datetime.timedelta(hours=settings.REQ_EXPIRE_HRS)
         if not self.token:
             self.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
         super(Request, self).save()

@@ -136,7 +136,7 @@ def profile_edit(request, l):
                         'name': me['cn'][0],
                         'url': request.build_absolute_uri(
                                          reverse(process, kwargs={ 'token': req.token })),
-                        'expire_in': '48 heures'
+                        'expire_in': settings.REQ_EXPIRE_STR,
                         })
                 send_mail(u'Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
                           [req.email], fail_silently=False)
@@ -210,7 +210,7 @@ def org_add(request, l, uid):
                     'name': req.name,
                     'url': request.build_absolute_uri(
                                      reverse(process, kwargs={ 'token': req.token })),
-                    'expire_in': '48 heures'
+                    'expire_in': settings.REQ_EXPIRE_STR,
                     })
             send_mail(u'Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
                       [req.email], fail_silently=False)
@@ -246,7 +246,7 @@ def passwd(request):
                     'name': user['cn'][0],
                     'url': request.build_absolute_uri(
                                      reverse(process, kwargs={ 'token': req.token })),
-                    'expire_in': '48 heures',
+                    'expire_in': settings.REQ_EXPIRE_STR,
                     })
                 send_mail(u'Changement de mot de passe FedeRez', t.render(c),
                           settings.EMAIL_FROM, [req.email], fail_silently=False)

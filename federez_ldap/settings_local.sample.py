@@ -32,6 +32,11 @@ EMAIL_PORT = 25
 # Address to appear in From field
 EMAIL_FROM = 'userhelp@example.org'
 
+# Number of hours a token sent by email remains valid after having been
+# created. Numeric and string versions should have the same meaning.
+REQ_EXPIRE_HRS = 48
+REQ_EXPIRE_STR = '48 heures'
+
 # LDAP URI (protocol and address)
 LDAP_URI = 'ldap://ldap.example.org'
 
