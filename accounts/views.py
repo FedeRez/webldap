@@ -165,9 +165,6 @@ def org(request, l, uid):
     except IndexError:
         raise Http404
 
-    if l.binddn not in org['owner']:
-        return error(request, 'You\'re not the manager')
-
     name = org['o'][0]
     try:
         uids = map(lambda dn: libldap.get(dn, 0), org['member'])
@@ -181,7 +178,10 @@ def org(request, l, uid):
             'owner': member_dn in org['owner']
             } for (member_dn, member) in search]
 
-    return render_to_response('accounts/org.html', { 'name': name, 'members': members },
+    return render_to_response('accounts/org.html',
+                              { 'name': name,
+                                'is_owner': l.binddn in org['owner'],
+                                'members': members },
                               context_instance=RequestContext(request))
 
 @connect_ldap

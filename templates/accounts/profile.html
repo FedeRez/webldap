@@ -13,7 +13,7 @@
   {% for org in orgs %}
   <li>
     {{ org.name }}
-    {% if org.is_owner %} | <a href="/org/{{ org.uid }}">gérer</a>{% endif %}
+    | <a href="/org/{{ org.uid }}">{% if org.is_owner %}gérer{% else %}voir{% endif %}</a>
   </li>
   {% endfor %}
 </ul>

@@ -5,7 +5,7 @@
 {% block content %}
 
 <h1>Association : {{ name }}</h1>
-<a href="add">ajouter un membre</a>
+{% if is_owner %}<a href="add">ajouter un membre</a>{% endif %}
 {% if members %}
 <ul>
 {% for member in members %}
