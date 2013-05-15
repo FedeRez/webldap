@@ -174,15 +174,43 @@ def org(request, l, uid):
         search = l.get(libldap.build_filter('|', uids), prefix='ou=users')
 
         members = [{
+            'uid': member['uid'][0],
             'name': member['cn'][0],
             'owner': member_dn in org['owner']
             } for (member_dn, member) in search]
 
     return render_to_response('accounts/org.html',
-                              { 'name': name,
+                              { 'uid': uid,
+                                'name': name,
                                 'is_owner': l.binddn in org['owner'],
                                 'members': members },
                               context_instance=RequestContext(request))
+
+@connect_ldap
+def org_promote(request, l, uid, user_uid):
+    try:
+        (org_dn, org) = l.get('(uid=%s)' % uid, prefix='ou=associations')[0]
+    except IndexError:
+        raise Http404
+
+    if l.binddn not in org['owner']:
+        return error(request, 'Vous n\'êtes pas gérant.')
+
+    try:
+        (user_dn, user) = l.get('(uid=%s)' % user_uid, prefix='ou=users')[0]
+    except IndexError:
+        raise Http404
+
+    l.set('uid=%s' % uid,
+          add={ 'owner': [user_dn] },
+          prefix='ou=associations')
+
+    name = org['o'][0]
+
+    return render_to_response('accounts/org_promote.html',
+                              { 'uid': org['uid'][0],
+                                'name': org['o'][0],
+                                'user_name': user['cn'][0] })
 
 @connect_ldap
 def org_add(request, l, uid):

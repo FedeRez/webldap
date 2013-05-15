@@ -9,7 +9,10 @@
 {% if members %}
 <ul>
 {% for member in members %}
-  <li>{{ member.name }}{% if member.owner %} (gérant){% endif %}</li>
+<li>
+  {{ member.name }}{% if member.owner %} (gérant)
+  {% else %} | <a href="/org/{{ uid }}/promote/{{ member.uid }}/">promouvoir</a>{% endif %}
+</li>
 {% endfor %}
 </ul>
 {% else %}
