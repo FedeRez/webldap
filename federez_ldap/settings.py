@@ -2,7 +2,7 @@
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
-    ('Bertrand Bonnefoy-Claudet', 'bertrandbc@gmail.com')
+    ('Bertrand Bonnefoy-Claudet', 'bertrandbc@gmail.com'),
 )
 
 MANAGERS = ADMINS
