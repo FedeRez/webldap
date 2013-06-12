@@ -12,8 +12,8 @@ body {
   margin-left: auto;
   margin-right: auto;
   width: 80%;
-  max-width: 900px;
-  min-width: 500px;
+  max-width: 55em;
+  min-width: 25em;
 }
 
 header {
