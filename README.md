@@ -1,7 +1,7 @@
 FedeRez LDAP web interface
 ==========================
 
-**webLDAP** gives users access to their LDAP accounts and ease the management
+**webLDAP** gives users access to their LDAP accounts and eases the management
 of such accounts by organization managers and administrators.
 
 Technology
