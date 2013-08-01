@@ -46,19 +46,10 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     if request.method == 'POST':
         f = LoginForm(request.POST)
         if f.is_valid():
-            try:
-                uid = f.cleaned_data['uid']
-                passwd = f.cleaned_data['passwd']
-                l = libldap.initialize(passwd, uid)
-            except libldap.InvalidCredentials:
-                error_msg = 'Identifiants incorrects'
-            except libldap.ConnectionError:
-                error_msg = 'Erreur de connexion'
-            else:
-                request.session['ldap_connected'] = True
-                request.session['ldap_uid'] = uid
-                request.session['ldap_passwd'] = passwd
-                return HttpResponseRedirect(redirect_to)
+            request.session['ldap_connected'] = True
+            request.session['ldap_uid'] = f.cleaned_data['uid']
+            request.session['ldap_passwd'] = f.cleaned_data['passwd']
+            return HttpResponseRedirect(redirect_to)
     else:
         f = LoginForm(label_suffix='')
 
