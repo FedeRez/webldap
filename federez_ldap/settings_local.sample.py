@@ -55,5 +55,6 @@ LDAP_WEBLDAP_USER = 'uid=webldap,ou=apps'
 # LDAP application password
 LDAP_WEBLDAP_PASSWD = 'secret'
 
-# Default LDAP groups for created users
+# Default LDAP groups and roles for created users
 LDAP_DEFAULT_GROUPS = ['wiki']
+LDAP_DEFAULT_ROLES = ['member']
