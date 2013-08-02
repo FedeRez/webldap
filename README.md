@@ -7,7 +7,7 @@ of such accounts by organization managers and administrators.
 Technology
 ----------
 
-Views rely on `libldap.py` to issue LDAP requests. This library is built upon
+Views rely on **ldapom** to issue LDAP requests. This library is built upon
 the python-ldap module.
 
 South is used for database migrations.
@@ -28,7 +28,6 @@ Main files:
         settings.py: project settings
         settings_local.sample.py: sample settings to be completed and renamed
     accounts/
-        libldap.py: LDAP helpers
         views.py: view functions (no class-based views)
         migrations: South migrations
         static/: static content
