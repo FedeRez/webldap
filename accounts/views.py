@@ -184,6 +184,7 @@ def org_promote(request, l, uid, user_uid):
         return error(request, 'Vous n\'êtes pas gérant.')
 
     org.owner.append(user.dn)
+    org.save()
 
     return render_to_response('accounts/org_promote.html',
                               { 'uid': org.o,
