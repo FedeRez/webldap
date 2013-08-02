@@ -138,4 +138,6 @@ LOGGING = {
 
 TEMPLATE_CONTEXT_PROCESSORS = ('accounts.views.session_info',)
 
+import os
+os.umask(077)
 from settings_local import *
