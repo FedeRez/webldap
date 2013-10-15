@@ -7,7 +7,8 @@ def uid_field():
                             label='identifiant ',
                             widget=forms.TextInput(attrs={ 'placeholder': 'prenom.nom' }))
 def passwd_field():
-    return forms.CharField(widget=forms.PasswordInput, label='mot de passe')
+    return forms.CharField(widget=forms.PasswordInput(attrs={ 'placeholder': '8 caractères minimum' }),
+                           label='mot de passe')
 
 def name_field():
     return forms.CharField(max_length=200,
