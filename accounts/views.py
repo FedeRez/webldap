@@ -282,6 +282,7 @@ def process(request, token):
         return error(request, 'Entrée incorrecte, contactez un admin')
 
 def process_account(request, req):
+    error_msg = u''
     if request.method == 'POST':
         f = ProcessAccountForm(request.POST)
         if f.is_valid():
@@ -296,29 +297,50 @@ def process_account(request, req):
             user.mail = req.email
             user.cn = f.cleaned_data['nick']
             user.sn = 'CHANGEIT!' # TODO
-            user.save()
-            user.set_password(f.cleaned_data['passwd'])
+            try:
+                user.save()
+                user.set_password(f.cleaned_data['passwd'])
 
-            if req.org_uid:
-                org = l.get_ldap_node('o=%s,ou=associations,%s' \
-                                      % (req.org_uid, settings.LDAP_BASE))
-                org.uniqueMember.append(user.dn)
-                org.save()
+                if req.org_uid:
+                    org = l.get_ldap_node('o=%s,ou=associations,%s' \
+                                          % (req.org_uid, settings.LDAP_BASE))
+                    org.uniqueMember.append(user.dn)
+                    org.save()
 
-            for group in settings.LDAP_DEFAULT_GROUPS:
-                group = l.get_ldap_node('cn=%s,ou=accesses,ou=groups,%s' \
-                                        % (group, settings.LDAP_BASE))
-                group.uniqueMember.append(user.dn)
-                group.save()
+                for group in settings.LDAP_DEFAULT_GROUPS:
+                    group = l.get_ldap_node('cn=%s,ou=accesses,ou=groups,%s' \
+                                            % (group, settings.LDAP_BASE))
+                    group.uniqueMember.append(user.dn)
+                    group.save()
 
-            for role in settings.LDAP_DEFAULT_ROLES:
-                role = l.get_ldap_node('cn=%s,ou=roles,%s' \
-                                       % (role, settings.LDAP_BASE))
-                role.roleOccupant.append(user.dn)
-                role.save()
+                for role in settings.LDAP_DEFAULT_ROLES:
+                    role = l.get_ldap_node('cn=%s,ou=roles,%s' \
+                                           % (role, settings.LDAP_BASE))
+                    role.roleOccupant.append(user.dn)
+                    role.save()
 
-            req.delete()
-            return HttpResponseRedirect('/')
+                req.delete()
+            except ldapom.ldap.CONSTRAINT_VIOLATION, e:
+                # Parse LDAP constraint violation exceptions to give meaningful information
+                error = e.args[0]
+                if error['info'] == 'some attributes not unique':
+                    error_msg = u'Pseudo déjà pris'
+                elif error['info'] == u'Password fails quality checking policy':
+                    error_msg = u'Mot de passe trop faible'
+                    user.delete()
+                else:
+                    raise e
+            except ldapom.ldap.ALREADY_EXISTS:
+                error_msg = u'Compte déjà créé'
+            else:
+                # Everything went well
+                return HttpResponseRedirect('/')
+
+            c = { 'form': f, 'error_msg': error_msg }
+            c.update(csrf(request))
+
+            return render_to_response('accounts/process_account.html', c,
+                                      context_instance=RequestContext(request))
     else:
         f = ProcessAccountForm(label_suffix='')
 

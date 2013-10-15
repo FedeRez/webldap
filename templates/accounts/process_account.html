@@ -2,6 +2,7 @@
 {% block title %}Activer un compte{% endblock %}
 {% block content %}
 <h1>Activer un compte</h1>
+{% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
 <form action="." method="post">
   {% csrf_token %}
   <table>
