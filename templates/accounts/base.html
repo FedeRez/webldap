@@ -17,6 +17,9 @@
         <a href="/logout"><strong>déconnexion</strong> ({{ logged_uid }})</a> |
         {% endif %}
         <a href="/">accueil</a> |
+        {% if is_admin %}
+        <a href="/admin">admin</a> |
+        {% endif %}
         <a href="/help">aide</a>
       </nav>
       <div id="content">

@@ -5,13 +5,13 @@
 {% block content %}
 
 <h1>Association : {{ name }}</h1>
-{% if is_owner %}<a href="add">ajouter un membre</a>{% endif %}
+{% if is_owner or is_admin %}<a href="add">ajouter un membre</a>{% endif %}
 {% if members %}
 <ul>
 {% for member in members %}
 <li>
   {{ member.name }}{% if member.owner %} (gérant)
-  {% elif is_owner %} | <a href="/org/{{ uid }}/promote/{{ member.uid }}/">promouvoir</a>{% endif %}
+  {% elif is_owner or is_admin %} | <a href="/org/{{ uid }}/promote/{{ member.uid }}/">promouvoir</a>{% endif %}
 </li>
 {% endfor %}
 </ul>

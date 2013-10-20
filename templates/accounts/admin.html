@@ -1,0 +1,15 @@
+{% extends "accounts/base.html" %}
+{% block title %}Administration{% endblock %}
+{% block content %}
+<h1>Administration</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<h2>Associations</h2>
+<ul>
+  {% for org in orgs %}
+  <li>
+    {{ org.name }}
+    | <a href="/org/{{ org.uid }}">gérer</a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

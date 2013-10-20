@@ -16,7 +16,8 @@ import ldapom
 # Context processor
 def session_info(request):
     return { 'logged_in': request.session.get('ldap_connected', False),
-             'logged_uid': request.session.get('ldap_binduid', None) }
+             'logged_uid': request.session.get('ldap_binduid', None),
+             'is_admin': request.session.get('is_admin', False) }
 
 # View decorator
 def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
@@ -32,6 +33,13 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
                     password=request.session['ldap_passwd'])
         except (KeyError, ldapom.ldap.INVALID_CREDENTIALS):
             return logout(request, redirect_field_name)
+
+        # Login successful, check if admin
+        if request.session.get('is_admin', None) is None:
+            admins = l.get_ldap_node(
+                    'cn=admin,ou=roles,%s' % settings.LDAP_BASE).roleOccupant
+            request.session['is_admin'] = request.session['ldap_binddn'] in admins
+
         return view(request, l=l, *args, **kwargs)
     return _view
 
@@ -180,7 +188,8 @@ def org_promote(request, l, uid, user_uid):
     except ldapom.ldap.NO_SUCH_OBJECT:
         raise Http404
 
-    if request.session['ldap_binddn'] not in org.owner:
+    if request.session['ldap_binddn'] not in org.owner \
+    and not request.session['is_admin']:
         return error(request, 'Vous n\'êtes pas gérant.')
 
     org.owner.append(user.dn)
@@ -199,7 +208,8 @@ def org_add(request, l, uid):
     except ldapom.ldap.NO_SUCH_OBJECT:
         raise Http404
 
-    if request.session['ldap_binddn'] not in org.owner:
+    if request.session['ldap_binddn'] not in org.owner \
+    and not request.session['is_admin']:
         return error(request, 'Vous n\'êtes pas gérant.')
 
     if request.method == 'POST':
@@ -224,11 +234,34 @@ def org_add(request, l, uid):
     else:
         f = RequestAccountForm(label_suffix='')
 
-    c = { 'form': f, 'name': org.cn, 'uid': uid, 'error_msg': error_msg }
+    c = { 'form': f,
+          'name': org.cn,
+          'uid': uid,
+          'error_msg': error_msg }
     c.update(csrf(request))
 
     return render_to_response('accounts/org_add.html', c,
                               context_instance=RequestContext(request))
+
+@connect_ldap
+def admin(request, l):
+    me = l.get_ldap_node(request.session['ldap_binddn'])
+
+    if not request.session['is_admin']:
+        return error('Vous n\'êtes pas administrateur')
+
+    search = l.search('(objectClass=groupOfUniqueNames)',
+                      base='ou=associations,%s' % settings.LDAP_BASE)
+    orgs = [{
+        'uid': org.o,
+        'name': org.cn,
+        'is_owner': me.dn in org.owner,
+        } for org in search]
+
+    return render_to_response('accounts/admin.html',
+            {
+                'orgs': orgs,
+            }, context_instance=RequestContext(request))
 
 def passwd(request):
     error_msg = None
