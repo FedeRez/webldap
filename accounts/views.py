@@ -290,7 +290,7 @@ def passwd(request):
                     'expire_in': settings.REQ_EXPIRE_STR,
                     })
                 send_mail(u'Changement de mot de passe FedeRez', t.render(c),
-                          settings.EMAIL_FROM, [user.email], fail_silently=False)
+                          settings.EMAIL_FROM, [str(user.mail)], fail_silently=False)
                 return HttpResponseRedirect('/')
     else:
         f = RequestPasswdForm(label_suffix='')
