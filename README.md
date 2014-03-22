@@ -46,3 +46,12 @@ See `requirements.txt` for what needs to be installed first.
 * Configure your web server or just run `python manage.py runserver`
 
 And you're set!
+
+Using and contributing
+----------------------
+
+webldap is licensed under the MIT license. For more information, see the
+`LICENSE` file.
+
+You are welcome to contribute to this project, preferably by pull requests or
+email.
