@@ -6,9 +6,13 @@ def uid_field():
     return forms.CharField(max_length=200,
                             label='identifiant ',
                             widget=forms.TextInput(attrs={ 'placeholder': 'prenom.nom' }))
-def passwd_field():
+def passwd_field(required=True):
     return forms.CharField(widget=forms.PasswordInput(attrs={ 'placeholder': '8 caractères minimum' }),
-                           label='mot de passe')
+                           label='mot de passe', required=required)
+
+def passwd_confirm_field(required=True):
+    return forms.CharField(widget=forms.PasswordInput(attrs={ 'placeholder': 'répéter le mot de passe' }),
+                           label='', required=required)
 
 def name_field():
     return forms.CharField(max_length=200,
@@ -18,19 +22,28 @@ def name_field():
 def nick_field():
     return forms.CharField(max_length=100, label='pseudo')
 
+class PasswordCheckMixin(forms.Form):
+    def clean(self):
+        cleaned_data = super(forms.Form, self).clean()
+        passwd = cleaned_data.get('passwd')
+        passwd_confirm = cleaned_data.get('passwd_confirm')
+
+        if passwd != passwd_confirm:
+            raise forms.ValidationError('Mots de passe différents')
+
+        return cleaned_data
+
 class LoginForm(forms.Form):
     uid = uid_field()
     passwd = forms.CharField(label='mot de passe',
                              widget=forms.PasswordInput)
 
-class ProfileForm(forms.Form):
+class ProfileForm(PasswordCheckMixin, forms.Form):
     name = name_field()
     nick = nick_field()
     email = forms.EmailField(max_length=254)
-    passwd = forms.CharField(
-             widget=forms.PasswordInput(attrs={ 'placeholder': 'uniquement si nouveau' }),
-             required=False,
-             label='mot de passe')
+    passwd = passwd_field(required=False)
+    passwd_confirm = passwd_confirm_field(required=False)
 
 class RequestAccountForm(forms.ModelForm):
     uid = uid_field()
@@ -45,9 +58,11 @@ class RequestPasswdForm(forms.ModelForm):
         model = Request
         fields = ('uid', 'email')
 
-class ProcessAccountForm(forms.Form):
+class ProcessAccountForm(PasswordCheckMixin, forms.Form):
     nick = nick_field()
     passwd = passwd_field()
+    passwd_confirm = passwd_confirm_field()
 
-class ProcessPasswdForm(forms.Form):
+class ProcessPasswdForm(PasswordCheckMixin, forms.Form):
     passwd = passwd_field()
+    passwd_confirm = passwd_confirm_field()
