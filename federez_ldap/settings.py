@@ -136,7 +136,10 @@ LOGGING = {
     }
 }
 
-TEMPLATE_CONTEXT_PROCESSORS = ('accounts.views.session_info',)
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.messages.context_processors.messages',
+    'accounts.views.session_info',
+)
 
 import os
 os.umask(077)

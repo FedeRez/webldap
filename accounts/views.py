@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.mail import send_mail
 from django.utils import timezone
+from django.contrib import messages
 from accounts.forms import (LoginForm, ProfileForm, RequestAccountForm, RequestPasswdForm,
                             ProcessAccountForm, ProcessPasswdForm)
 from models import Request
