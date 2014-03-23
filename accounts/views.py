@@ -141,6 +141,7 @@ def profile_edit(request, l):
                         })
                 send_mail(u'Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
                           [req.email], fail_silently=False)
+                messages.success(request, 'Un email vous a été envoyé pour confirmer votre nouvelle adresse email')
 
             return HttpResponseRedirect('/')
 
@@ -230,6 +231,7 @@ def org_add(request, l, uid):
                     })
             send_mail(u'Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
                       [req.email], fail_silently=False)
+            messages.success(request, 'Email envoyé à %s pour la création du compte' % req.email)
 
             return HttpResponseRedirect('/org/%s' % uid)
     else:
@@ -367,7 +369,8 @@ def process_account(request, req):
             except ldapom.ldap.ALREADY_EXISTS:
                 error_msg = u'Compte déjà créé'
             else:
-                # Everything went well
+                messages.success(request, 'Compte créé')
+
                 return HttpResponseRedirect('/')
 
             c = { 'form': f, 'error_msg': error_msg }
@@ -394,8 +397,9 @@ def process_passwd(request, req):
                     password=settings.LDAP_WEBLDAP_PASSWD)
             user = l.get_ldap_node('uid=%s,ou=users,%s' % (req.uid, settings.LDAP_BASE))
             user.set_password(f.cleaned_data['passwd'])
-
             req.delete()
+            messages.success(request, 'Mot de passe changé')
+
             return HttpResponseRedirect('/')
     else:
         f = ProcessPasswdForm(label_suffix='')
@@ -414,8 +418,9 @@ def process_email(request, l, req):
     user = l.get_ldap_node(request.session['ldap_binddn'])
     user.mail = req.email
     user.save()
-
     req.delete()
+    messages.success(request, 'Email confirmé')
+
     return HttpResponseRedirect('/')
 
 def help(request):
