@@ -1,5 +1,4 @@
-Django==1.4
+Django==1.5
 South>=0.7.5
-python-ldap>=2.3.11
 wsgiref==0.1.2
-ldapom>=0.9.4
+ldapom>=0.11.0

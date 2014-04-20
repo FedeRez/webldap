@@ -142,5 +142,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 import os
-os.umask(077)
-from settings_local import *
+os.umask(0o077)
+from .settings_local import *

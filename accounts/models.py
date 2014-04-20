@@ -27,5 +27,5 @@ class Request(models.Model):
             self.expires_at = timezone.now() \
                             + datetime.timedelta(hours=settings.REQ_EXPIRE_HRS)
         if not self.token:
-            self.token = str(uuid.uuid4()).translate(None, '-') # remove hyphens
+            self.token = str(uuid.uuid4()).replace('-', '') # remove hyphens
         super(Request, self).save()
