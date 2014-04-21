@@ -10,14 +10,25 @@
 <ul>
 {% for member in members %}
 <li>
-  {{ member.name }}{% if member.owner %} (gérant)
-  {% elif is_owner or is_admin %} | <a href="/org/{{ uid }}/promote/{{ member.uid }}/">promouvoir</a>{% endif %}
+  {{ member.name }}
+  {% if is_owner or is_admin %}
+  {% if member.owner %}
+  | <a href="/org/{{ uid }}/relegate/{{ member.uid }}/"><strong>rétrograder</strong></a>
+  {% else %}
+  | <a href="/org/{{ uid }}/promote/{{ member.uid }}/">promouvoir</a>
+  {% endif %}
+  {% else %}
+  {% if member.owner %}
+  (gérant)
+  {% endif %}
+  {% endif %}
 </li>
 {% endfor %}
 </ul>
 {% else %}
 <p>Aucun membre.</p>
 {% endif %}
+
 <a href="/">retour</a>
 
 {% endblock %}

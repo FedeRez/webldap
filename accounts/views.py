@@ -207,6 +207,25 @@ def org_promote(request, l, uid, user_uid):
                                 'user_name': user.displayName })
 
 @connect_ldap
+def org_relegate(request, l, uid, user_uid):
+    org = l.get_entry('o=%s,ou=associations,%s' % (uid, settings.LDAP_BASE))
+    user = l.get_entry('uid=%s,ou=users,%s' % (user_uid, settings.LDAP_BASE))
+
+    if not org.exists() or not user.exists():
+        raise Http404
+
+    if request.session['ldap_binddn'] not in org.owner \
+    and not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes ni gérant, ni admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    org.owner.discard(user.dn)
+    org.save()
+
+    messages.success(request, '{} n\'est plus gérant'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
+
+@connect_ldap
 def org_add(request, l, uid):
     org = l.get_entry('o=%s,ou=associations,%s' % (uid, settings.LDAP_BASE))
     if not org.exists():

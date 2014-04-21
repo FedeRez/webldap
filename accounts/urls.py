@@ -10,6 +10,7 @@ urlpatterns = patterns('accounts.views',
     url(r'^org/(?P<uid>[A-Za-z0-9-_]+)/$', 'org'),
     url(r'^org/(?P<uid>[A-Za-z0-9-_]+)/add/$', 'org_add'),
     url(r'^org/(?P<uid>[A-Za-z0-9-_]+)/promote/(?P<user_uid>[a-z-.]+)/$', 'org_promote'),
+    url(r'^org/(?P<uid>[A-Za-z0-9-_]+)/relegate/(?P<user_uid>[a-z-.]+)/$', 'org_relegate'),
     url(r'^process/(?P<token>[a-z0-9]{32})/$', 'process'),
     url(r'^help/$', 'help'),
 )
