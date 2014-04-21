@@ -196,15 +196,14 @@ def org_promote(request, l, uid, user_uid):
 
     if request.session['ldap_binddn'] not in org.owner \
     and not request.session['is_admin']:
-        return error(request, 'Vous n\'êtes pas gérant.')
+        messages.error(request, 'Vous n\'êtes ni gérant, ni admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
 
     org.owner.add(user.dn)
     org.save()
 
-    return render_to_response('accounts/org_promote.html',
-                              { 'uid': one(org.o),
-                                'name': one(org.cn),
-                                'user_name': user.displayName })
+    messages.success(request, '{} est désormais gérant'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
 
 @connect_ldap
 def org_relegate(request, l, uid, user_uid):
