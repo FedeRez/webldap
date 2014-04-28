@@ -311,7 +311,7 @@ def passwd(request):
                     'expire_in': settings.REQ_EXPIRE_STR,
                     })
                 send_mail('Changement de mot de passe FedeRez', t.render(c),
-                          settings.EMAIL_FROM, [str(user.mail)], fail_silently=False)
+                          settings.EMAIL_FROM, [one(user.mail)], fail_silently=False)
                 return HttpResponseRedirect('/')
     else:
         f = RequestPasswdForm(label_suffix='')
@@ -406,11 +406,11 @@ def process_passwd(request, req):
     if request.method == 'POST':
         f = ProcessPasswdForm(request.POST)
         if f.is_valid():
-            l = ldapom.LdapConnection(uri=settings.LDAP_URI,
+            l = ldapom.LDAPConnection(uri=settings.LDAP_URI,
                     base=settings.LDAP_BASE,
-                    login=settings.LDAP_WEBLDAP_USER,
-                    password=settings.LDAP_WEBLDAP_PASSWD)
-            user = l.get_ldap_node('uid=%s,ou=users,%s' % (req.uid, settings.LDAP_BASE))
+                    bind_dn=settings.LDAP_WEBLDAP_USER,
+                    bind_password=settings.LDAP_WEBLDAP_PASSWD)
+            user = l.get_entry('uid=%s,ou=users,%s' % (req.uid, settings.LDAP_BASE))
             user.set_password(f.cleaned_data['passwd'])
             req.delete()
             messages.success(request, 'Mot de passe changé')
