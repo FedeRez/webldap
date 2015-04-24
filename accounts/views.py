@@ -1,4 +1,5 @@
 # coding=utf8
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import Context, RequestContext, loader
 from django.core.context_processors import csrf
@@ -109,6 +110,8 @@ def profile(request, l):
                 'groups': groups,
             }, context_instance=RequestContext(request))
 
+@sensitive_post_parameters('passwd')
+@sensitive_variables('passwd_new')
 @connect_ldap
 def profile_edit(request, l):
     me = l.get_entry(request.session['ldap_binddn'])
@@ -402,6 +405,7 @@ def process_account(request, req):
     return render_to_response('accounts/process_account.html', c,
                               context_instance=RequestContext(request))
 
+@sensitive_post_parameters()
 def process_passwd(request, req):
     if request.method == 'POST':
         f = ProcessPasswdForm(request.POST)
