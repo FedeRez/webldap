@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /srv/webldap
+exec s6-envdir /var/run/s6/container_environment s6-setuidgid www-data $@

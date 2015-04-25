@@ -1,4 +1,3 @@
-federez_ldap/settings_local.py
-db
-*.pyc
-.*swp
+app/federez_ldap/settings_local.py
+docker/secret.yml
+docker/db

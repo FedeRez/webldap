@@ -1,0 +1,57 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+function hl {
+    echo -e "\e[96m$1\e[0m" # light cyan
+}
+
+echo $(hl "Domain: $LDAP_DOMAIN")
+echo $(hl "Organization: $LDAP_ORG")
+echo $(hl "Admin password: $LDAP_ADMIN_PASSWD")
+
+# Stop slapd.
+s6-svc -dD /var/run/s6/services/slapd/
+
+rm -rf /var/lib/ldap/*
+rm -rf /etc/ldap/slapd.d/*
+
+cat << EOF | debconf-set-selections
+slapd slapd/internal/generated_adminpw password $LDAP_ADMIN_PASSWD
+slapd slapd/internal/adminpw password $LDAP_ADMIN_PASSWD
+slapd slapd/password2 password $LDAP_ADMIN_PASSWD
+slapd slapd/password1 password $LDAP_ADMIN_PASSWD
+slapd slapd/dump_database_destdir string /var/backups/slapd-VERSION
+slapd slapd/domain string $LDAP_DOMAIN
+slapd shared/organization string $LDAP_ORG
+slapd slapd/backend string HDB
+slapd slapd/purge_database boolean true
+slapd slapd/move_old_database boolean false
+slapd slapd/allow_ldap_v2 boolean false
+slapd slapd/no_configuration boolean false
+slapd slapd/dump_database select when needed
+EOF
+
+dpkg-reconfigure -f noninteractive slapd
+
+basedn=$(slapcat -n0 | awk -F ': ' '$1 == "olcSuffix" {print $2}')
+conf='-H ldapi:/// -Y EXTERNAL'
+main="-H ldapi:/// -x -D cn=admin,$basedn -w $LDAP_ADMIN_PASSWD"
+
+# Start slapd and wait for it to be ready.
+s6-svc -u /var/run/s6/services/slapd/
+until ldapwhoami $conf > /dev/null 2>&1; do sleep .2; done
+
+(
+    shopt -s nullglob # Allow empty globs in the following loops.
+
+    for ldif in /tmp/ldap/conf/*.ldif; do
+        echo $(hl "Adding file $ldif")
+        ldapadd $conf -f $ldif
+    done
+
+    for ldif in /tmp/ldap/main/*.ldif; do
+        echo $(hl "Adding file $ldif")
+        ldapadd $main -f $ldif
+    done
+)

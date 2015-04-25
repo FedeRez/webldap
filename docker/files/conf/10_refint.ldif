@@ -1,0 +1,17 @@
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: refint.la
+
+dn: olcOverlay=refint,olcDatabase={1}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+olcOverlay: {4}Refint
+olcRefintAttribute: member
+olcRefintAttribute: owner
+olcRefintAttribute: memberOf
+olcRefintAttribute: manager
+olcRefintAttribute: aliasedObjectName
+olcRefintAttribute: uniqueMember
+olcRefintNothing: cn=admin,dc=example,dc=net

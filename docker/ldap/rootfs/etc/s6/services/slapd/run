@@ -1,0 +1,4 @@
+#!/bin/sh
+
+slapd-fix
+exec slapd -d 0 -h "ldap:/// ldapi:///" -u openldap -g openldap ${LDAP_OPTS:-}

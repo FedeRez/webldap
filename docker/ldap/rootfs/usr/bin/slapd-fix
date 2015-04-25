@@ -1,0 +1,14 @@
+#!/bin/sh
+set -o nounset
+set -o errexit
+
+# Fix permissions in /etc/ldap/slapd.d
+chown -R openldap:openldap /etc/ldap/slapd.d
+find /etc/ldap/slapd.d -type d -exec chmod 750 {} \;
+find /etc/ldap/slapd.d -type f -exec chmod 600 {} \;
+chmod 755 /etc/ldap/slapd.d
+
+# Fix permissions in /var/lib/ldap
+chown -R openldap:openldap /var/lib/ldap
+chmod 755 /var/lib/ldap
+find /var/lib/ldap -type f -exec chmod 600 {} \;

@@ -1,0 +1,38 @@
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * 
+ by dn="cn=sync,ou=service-users,dc=example,dc=net" read 
+ by group/organizationalRole/roleOccupant="cn=admin,ou=roles,dc=example,dc=net" write 
+ by * break
+olcAccess: {1}to attrs=userPassword,shadowLastChange 
+ by self write 
+ by anonymous auth 
+ by group="cn=usermgmt,ou=services,ou=groups,dc=example,dc=net" write
+olcAccess: {2}to dn.base="" 
+ by * read
+olcAccess: {3}to dn.sub="ou=training,dc=example,dc=net" 
+ by dn="cn=user,ou=training,dc=example,dc=net" write
+olcAccess: {4}to dn.sub="ou=users,dc=example,dc=net" 
+ by self write 
+ by group="cn=usermgmt,ou=services,ou=groups,dc=example,dc=net" write 
+ by users read
+olcAccess: {5}to dn.sub="ou=associations,dc=example,dc=net" 
+ by dnattr=owner write 
+ by group="cn=usermgmt,ou=services,ou=groups,dc=example,dc=net" write 
+ by group/organizationalRole/roleOccupant="cn=member,ou=roles,dc=example,dc=net" read 
+ by group="cn=readonly,ou=services,ou=groups,dc=example,dc=net" read
+olcAccess: {6}to dn.sub="ou=service-users,dc=example,dc=net" 
+ by self write 
+ by group="cn=auth,ou=services,ou=groups,dc=example,dc=net" read
+olcAccess: {7}to dn.sub="ou=groups,dc=example,dc=net" 
+ by group/organizationalRole/roleOccupant="cn=member,ou=roles,dc=example,dc=net" read 
+ by group="cn=auth,ou=services,ou=groups,dc=example,dc=net" read
+olcAccess: {8}to dn.sub="ou=roles,dc=example,dc=net" 
+ by group="cn=usermgmt,ou=services,ou=groups,dc=example,dc=net" write 
+ by group/organizationalRole/roleOccupant="cn=member,ou=roles,dc=example,dc=net" read 
+ by group="cn=auth,ou=services,ou=groups,dc=example,dc=net" read
+olcAccess: {9}to * 
+ by self write 
+ by group/organizationalRole/roleOccupant="cn=member,ou=roles,dc=example,dc=net" read
+-

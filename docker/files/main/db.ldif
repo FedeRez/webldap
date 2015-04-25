@@ -1,0 +1,160 @@
+dn: ou=users,dc=example,dc=net
+objectClass: organizationalUnit
+ou: users
+description: Users
+
+dn: ou=associations,dc=example,dc=net
+objectClass: organizationalUnit
+ou: associations
+description: Organizations
+
+dn: ou=groups,dc=example,dc=net
+objectClass: organizationalUnit
+ou: groups
+description: User groups
+
+dn: ou=roles,dc=example,dc=net
+objectClass: organizationalUnit
+ou: roles
+description: Roles
+
+dn: ou=service-users,dc=example,dc=net
+objectClass: organizationalUnit
+ou: service-users
+description: Service accounts
+
+dn: ou=policies,dc=example,dc=net
+objectClass: organizationalUnit
+ou: policies
+description: Password policy
+
+dn: ou=services,ou=groups,dc=example,dc=net
+objectClass: organizationalUnit
+ou: services
+description: Service groups
+
+dn: ou=accesses,ou=groups,dc=example,dc=net
+objectClass: organizationalUnit
+ou: accesses
+description: Service access groups
+
+dn: uid=john.doe,ou=users,dc=example,dc=net
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: netFederezUser
+uid: john.doe
+cn: jojo
+displayName: John Doe
+givenName: John
+sn: Doe
+mail: www-data@localhost
+userPassword: {SSHA}siELDi95z33YlU6J6FZ6pVoisv9dPFAU
+homeDirectory: /home/john
+uidNumber: 10001
+gidNumber: 10001
+loginShell: /bin/zsh
+shadowMax: 99999
+shadowMin: 0
+shadowWarning: 7
+netFederezUID: john
+
+dn: uid=john.smith,ou=users,dc=example,dc=net
+objectClass: inetOrgPerson
+uid: john.smith
+cn: Smithy
+displayName: John Smith
+sn: Smith
+mail: www-data@localhost
+userPassword: {SSHA}2SZvF+qNpUhfun7TtLnmtW+GtWDrPwt5
+
+
+dn: uid=super.user,ou=users,dc=example,dc=net
+objectClass: inetOrgPerson
+uid: super.user
+cn: SU
+displayName: Super User
+sn: User
+mail: www-data@localhost
+userPassword: {SSHA}yQPjBJKYecatI6Ozk8aLkuYrsmS+amWG
+
+dn: o=john-org,ou=associations,dc=example,dc=net
+objectClass: groupOfUniqueNames
+cn: John's Organization
+o: john-org
+uniqueMember: uid=john.doe,ou=users,dc=example,dc=net
+uniqueMember: uid=john.smith,ou=users,dc=example,dc=net
+owner: uid=john.doe,ou=users,dc=example,dc=net
+
+dn: cn=member,ou=roles,dc=example,dc=net
+objectClass: organizationalRole
+cn: member
+description: Members of the federation
+roleOccupant: uid=john.doe,ou=users,dc=example,dc=net
+roleOccupant: uid=john.smith,ou=users,dc=example,dc=net
+roleOccupant: uid=super.user,ou=users,dc=example,dc=net
+
+dn: cn=admin,ou=roles,dc=example,dc=net
+objectClass: organizationalRole
+cn: admin
+roleOccupant: uid=super.user,ou=users,dc=example,dc=net
+description: LDAP administrators
+
+dn: ou=posix,ou=groups,dc=example,dc=net
+objectClass: organizationalUnit
+ou: posix
+description: POSIX groups
+
+dn: cn=john.doe,ou=posix,ou=groups,dc=example,dc=net
+objectClass: posixGroup
+gidNumber: 10001
+cn: john
+memberUid: john
+
+dn: cn=sudoldap,ou=posix,ou=groups,dc=example,dc=net
+objectClass: posixGroup
+gidNumber: 10004
+cn: sudoldap
+memberUid: john
+
+dn: cn=webldap,ou=service-users,dc=example,dc=net
+objectClass: applicationProcess
+objectClass: simpleSecurityObject
+userPassword: {SSHA}LX9BeosaDoU2fK/GC5gOjEk+XrQEjOFy
+cn: webldap
+description: Special account for webldap
+
+dn: cn=passwords,ou=policies,dc=example,dc=net
+objectClass: pwdPolicy
+objectClass: pwdPolicyChecker
+objectClass: person
+objectClass: top
+pwdAllowUserChange: TRUE
+pwdAttribute: userPassword
+pwdCheckQuality: 2
+pwdExpireWarning: 600
+pwdFailureCountInterval: 30
+pwdGraceAuthNLimit: 5
+pwdInHistory: 0
+pwdLockout: FALSE
+pwdLockoutDuration: 0
+pwdMaxAge: 0
+pwdMaxFailure: 5
+pwdMinAge: 0
+pwdMustChange: TRUE
+pwdSafeModify: FALSE
+sn: Passwords Policy
+cn: passwords
+pwdMinLength: 8
+
+dn: cn=ssh,ou=accesses,ou=groups,dc=example,dc=net
+cn: ssh
+objectClass: groupOfUniqueNames
+uniqueMember: uid=john.doe,ou=users,dc=example,dc=net
+description: SSH access
+
+dn: cn=usermgmt,ou=services,ou=groups,dc=example,dc=net
+objectClass: groupOfNames
+cn: usermgmt
+member: cn=webldap,ou=service-users,dc=example,dc=net
+description: User management

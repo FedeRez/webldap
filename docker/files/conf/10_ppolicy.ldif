@@ -1,0 +1,14 @@
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: ppolicy.la
+
+dn: olcOverlay=ppolicy,olcDatabase={1}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcPPolicyConfig
+olcOverlay: {2}PPolicy
+olcPPolicyDefault: cn=passwords,ou=policies,dc=example,dc=net
+olcPPolicyHashCleartext: TRUE
+olcPPolicyUseLockout: TRUE
+olcPPolicyForwardUpdates: FALSE

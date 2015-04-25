@@ -1,0 +1,11 @@
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: unique.la
+
+dn: olcOverlay=unique,olcDatabase={1}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcUniqueConfig
+olcOverlay: {3}unique
+olcUniqueURI: ldap:///ou=users,dc=example,dc=net?cn,uidNumber,gidNumber,homeDirectory?sub
