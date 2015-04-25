@@ -1,5 +1,5 @@
 """
-WSGI config for federez_ldap project.
+WSGI config for webldap project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -18,7 +18,7 @@ import os
 from os.path import dirname
 
 sys.path.append(dirname(dirname(__file__)))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "federez_ldap.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webldap.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

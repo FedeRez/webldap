@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'AccountRequest'
-        db.create_table('accounts_accountrequest', (
+        db.create_table('main_accountrequest', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('token', self.gf('django.db.models.fields.CharField')(max_length=32)),
             ('uid', self.gf('django.db.models.fields.CharField')(max_length=200)),
@@ -18,16 +18,16 @@ class Migration(SchemaMigration):
             ('org_uid', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal('accounts', ['AccountRequest'])
+        db.send_create_signal('main', ['AccountRequest'])
 
 
     def backwards(self, orm):
         # Deleting model 'AccountRequest'
-        db.delete_table('accounts_accountrequest')
+        db.delete_table('main_accountrequest')
 
 
     models = {
-        'accounts.accountrequest': {
+        'main.accountrequest': {
             'Meta': {'object_name': 'AccountRequest'},
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '254'}),
@@ -39,4 +39,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['accounts']
+    complete_apps = ['main']

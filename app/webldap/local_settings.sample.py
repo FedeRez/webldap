@@ -1,5 +1,3 @@
-# Local settings
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -15,41 +13,37 @@ DATABASES = {
 }
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '&amp;%_)uh4i3u%7fmcm98$tu+r03619eb!qqrwzhk92%eyl0@tdt5'
+SECRET_KEY = ''
 
+# Absolute paths to template directories
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
 )
 
-# Settings specific to 'accounts'
-
 # SMTP relay (host and port) to use for confirmation mails
-EMAIL_HOST = 'incoming-relays.illinois.edu'
+EMAIL_HOST = 'mail.example.net'
 EMAIL_PORT = 25
 
-# Address to appear in From field
-EMAIL_FROM = 'userhelp@example.org'
+# Email `From` field
+EMAIL_FROM = 'support@example.net'
 
-# Number of hours a token sent by email remains valid after having been
-# created. Numeric and string versions should have the same meaning.
+# Number of hours a token remains valid after having been created.  Numeric and string
+# versions should have the same meaning.
 REQ_EXPIRE_HRS = 48
 REQ_EXPIRE_STR = '48 heures'
 
-# LDAP URI (protocol and address)
-LDAP_URI = 'ldap://ldap.example.org'
+# LDAP server URI (protocol and address)
+LDAP_URI = 'ldap://ldap.example.net'
 
-# Whether to use STARTTLS or not
+# Whether to use STARTTLS
 LDAP_STARTTLS = False
 
-# Certificate to be used with LDAPS or STARTTLS
+# Certificate used with LDAPS or STARTTLS
 LDAP_CACERT = ''
 
-# LDAP base
-LDAP_BASE = 'dc=example,dc=org'
+# LDAP base DN
+LDAP_BASE = 'dc=example,dc=net'
 
-# LDAP application uid (without base)
+# LDAP application DN (without the base)
 LDAP_WEBLDAP_USER = 'uid=webldap,ou=apps'
 
 # LDAP application password

@@ -1,7 +1,7 @@
-{% extends "accounts/base.html" %}
-{% block title %}Connexion{% endblock %}
+{% extends "main/base.html" %}
+{% block title %}Activer un compte{% endblock %}
 {% block content %}
-<h1>Connexion</h1>
+<h1>Activer un compte</h1>
 {% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
 <form action="." method="post">
   {% csrf_token %}
@@ -10,10 +10,9 @@
     <tr>
       <td></td>
       <td>
-        <input type="submit" value="Connexion" /> <a href="/passwd">mot de passe oublié</a>
+        <input type="submit" value="Activer" />
       </td>
     </tr>
   </table>
-  <input type="hidden" name="next" value="{{ next }}" />
 </form>
 {% endblock %}

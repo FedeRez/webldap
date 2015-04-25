@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from federez_ldap import settings
+from webldap import settings
 
 import datetime, uuid
 

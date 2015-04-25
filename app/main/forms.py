@@ -1,6 +1,6 @@
 # coding=utf8
 from django import forms
-from accounts.models import Request
+from main.models import Request
 
 def uid_field():
     return forms.CharField(max_length=200,

@@ -1,7 +1,7 @@
-{% extends "accounts/base.html" %}
-{% block title %}Mot de passe oublié{% endblock %}
+{% extends "main/base.html" %}
+{% block title %}Connexion{% endblock %}
 {% block content %}
-<h1>Mot de passe oublié</h1>
+<h1>Connexion</h1>
 {% if error_msg %}<p><strong>{{ error_msg }}</strong></p>{% endif %}
 <form action="." method="post">
   {% csrf_token %}
@@ -10,9 +10,10 @@
     <tr>
       <td></td>
       <td>
-        <input type="submit" value="Envoyer" />
+        <input type="submit" value="Connexion" /> <a href="/passwd">mot de passe oublié</a>
       </td>
     </tr>
   </table>
+  <input type="hidden" name="next" value="{{ next }}" />
 </form>
 {% endblock %}

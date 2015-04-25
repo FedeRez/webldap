@@ -9,18 +9,18 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'AccountRequest.expires_at'
-        db.add_column('accounts_accountrequest', 'expires_at',
+        db.add_column('main_accountrequest', 'expires_at',
                       self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2013, 4, 5, 0, 0)),
                       keep_default=False)
 
 
     def backwards(self, orm):
         # Deleting field 'AccountRequest.expires_at'
-        db.delete_column('accounts_accountrequest', 'expires_at')
+        db.delete_column('main_accountrequest', 'expires_at')
 
 
     models = {
-        'accounts.accountrequest': {
+        'main.accountrequest': {
             'Meta': {'object_name': 'AccountRequest'},
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '254'}),
@@ -33,4 +33,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['accounts']
+    complete_apps = ['main']

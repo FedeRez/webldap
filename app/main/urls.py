@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('accounts.views',
+urlpatterns = patterns('main.views',
     url(r'^$', 'profile'),
     url(r'^edit/$', 'profile_edit'),
     url(r'^login/$', 'login'),

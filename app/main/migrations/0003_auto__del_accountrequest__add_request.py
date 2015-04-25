@@ -9,10 +9,10 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Deleting model 'AccountRequest'
-        db.delete_table('accounts_accountrequest')
+        db.delete_table('main_accountrequest')
 
         # Adding model 'Request'
-        db.create_table('accounts_request', (
+        db.create_table('main_request', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('type', self.gf('django.db.models.fields.CharField')(max_length=2)),
             ('token', self.gf('django.db.models.fields.CharField')(max_length=32)),
@@ -23,12 +23,12 @@ class Migration(SchemaMigration):
             ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('expires_at', self.gf('django.db.models.fields.DateTimeField')()),
         ))
-        db.send_create_signal('accounts', ['Request'])
+        db.send_create_signal('main', ['Request'])
 
 
     def backwards(self, orm):
         # Adding model 'AccountRequest'
-        db.create_table('accounts_accountrequest', (
+        db.create_table('main_accountrequest', (
             ('token', self.gf('django.db.models.fields.CharField')(max_length=32)),
             ('org_uid', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
@@ -38,14 +38,14 @@ class Migration(SchemaMigration):
             ('expires_at', self.gf('django.db.models.fields.DateTimeField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
-        db.send_create_signal('accounts', ['AccountRequest'])
+        db.send_create_signal('main', ['AccountRequest'])
 
         # Deleting model 'Request'
-        db.delete_table('accounts_request')
+        db.delete_table('main_request')
 
 
     models = {
-        'accounts.request': {
+        'main.request': {
             'Meta': {'object_name': 'Request'},
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '254'}),
@@ -59,4 +59,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['accounts']
+    complete_apps = ['main']

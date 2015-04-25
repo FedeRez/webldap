@@ -12,7 +12,7 @@ from django.contrib import messages
 from .forms import (LoginForm, ProfileForm, RequestAccountForm, RequestPasswdForm,
                             ProcessAccountForm, ProcessPasswdForm)
 from .models import Request
-from federez_ldap import settings
+from webldap import settings
 import ldapom
 
 def one(singleton):
@@ -50,7 +50,7 @@ def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NA
     return _view
 
 def error(request, error_msg):
-    return render_to_response('accounts/error.html', { 'error_msg': error_msg },
+    return render_to_response('main/error.html', { 'error_msg': error_msg },
                               context_instance=RequestContext(request))
 
 def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
@@ -71,7 +71,7 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     c = { 'form': f, redirect_field_name: redirect_to }
     c.update(csrf(request))
 
-    return render_to_response('accounts/login.html', c,
+    return render_to_response('main/login.html', c,
                               context_instance=RequestContext(request))
 
 def logout(request, redirect_field_name=REDIRECT_FIELD_NAME, next=None):
@@ -100,7 +100,7 @@ def profile(request, l):
         'name': one(group.cn),
         } for group in search]
 
-    return render_to_response('accounts/profile.html',
+    return render_to_response('main/profile.html',
             {
                 'uid': me.uid,
                 'name': me.displayName,
@@ -140,7 +140,7 @@ def profile_edit(request, l):
                 req.email = email_new
                 req.save()
 
-                t = loader.get_template('accounts/email_email_request')
+                t = loader.get_template('main/email_email_request')
                 c = Context({
                         'name': me.displayName,
                         'url': request.build_absolute_uri(
@@ -164,7 +164,7 @@ def profile_edit(request, l):
           'email': one(me.mail) }
     c.update(csrf(request))
 
-    return render_to_response('accounts/edit.html', c,
+    return render_to_response('main/edit.html', c,
                               context_instance=RequestContext(request))
 
 @connect_ldap
@@ -182,7 +182,7 @@ def org(request, l, uid):
         'owner': member.dn in org.owner,
         } for member in search]
 
-    return render_to_response('accounts/org.html',
+    return render_to_response('main/org.html',
                               { 'uid': uid,
                                 'name': one(org.cn),
                                 'is_owner': request.session['ldap_binddn'] in org.owner,
@@ -245,7 +245,7 @@ def org_add(request, l, uid):
             req.type = Request.ACCOUNT
             req.save()
 
-            t = loader.get_template('accounts/email_account_request')
+            t = loader.get_template('main/email_account_request')
             c = Context({
                     'name': req.name,
                     'url': request.build_absolute_uri(
@@ -265,7 +265,7 @@ def org_add(request, l, uid):
           'uid': uid }
     c.update(csrf(request))
 
-    return render_to_response('accounts/org_add.html', c,
+    return render_to_response('main/org_add.html', c,
                               context_instance=RequestContext(request))
 
 @connect_ldap
@@ -283,7 +283,7 @@ def admin(request, l):
         'is_owner': me.dn in org.owner,
         } for org in search]
 
-    return render_to_response('accounts/admin.html',
+    return render_to_response('main/admin.html',
             {
                 'orgs': orgs,
             }, context_instance=RequestContext(request))
@@ -306,7 +306,7 @@ def passwd(request):
                 req.type = Request.PASSWD
                 req.save()
 
-                t = loader.get_template('accounts/email_passwd_request')
+                t = loader.get_template('main/email_passwd_request')
                 c = Context({
                     'name': user.displayName,
                     'url': request.build_absolute_uri(
@@ -322,7 +322,7 @@ def passwd(request):
     c = { 'form': f }
     c.update(csrf(request))
 
-    return render_to_response('accounts/passwd.html', c,
+    return render_to_response('main/passwd.html', c,
                                   context_instance=RequestContext(request))
 
 def process(request, token):
@@ -394,7 +394,7 @@ def process_account(request, req):
             c = { 'form': f }
             c.update(csrf(request))
 
-            return render_to_response('accounts/process_account.html', c,
+            return render_to_response('main/process_account.html', c,
                                       context_instance=RequestContext(request))
     else:
         f = ProcessAccountForm(label_suffix='')
@@ -402,7 +402,7 @@ def process_account(request, req):
     c = { 'form': f }
     c.update(csrf(request))
 
-    return render_to_response('accounts/process_account.html', c,
+    return render_to_response('main/process_account.html', c,
                               context_instance=RequestContext(request))
 
 @sensitive_post_parameters()
@@ -426,7 +426,7 @@ def process_passwd(request, req):
     c = { 'form': f }
     c.update(csrf(request))
 
-    return render_to_response('accounts/process_passwd.html', c,
+    return render_to_response('main/process_passwd.html', c,
                               context_instance=RequestContext(request))
 
 @connect_ldap
@@ -443,5 +443,5 @@ def process_email(request, l, req):
     return HttpResponseRedirect('/')
 
 def help(request):
-    return render_to_response('accounts/help.html',
+    return render_to_response('main/help.html',
                               context_instance=RequestContext(request))

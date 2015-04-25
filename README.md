@@ -19,15 +19,14 @@ useful Django modules are not used.
 Architecture
 ------------
 
-This Django project is meant to be simple. One app `accounts` inside the
-`federez_ldap` project.
+This Django project is meant to be simple. One app `main` inside the `webldap` project.
 
 Main files:
 
-    federez_ldap/
+    webldap/
         settings.py: project settings
-        settings_local.sample.py: sample settings to be completed and renamed
-    accounts/
+        local_settings.sample.py: sample settings to be completed and renamed
+    main/
         views.py: view functions (no class-based views)
         migrations: South migrations
         static/: static content
@@ -37,11 +36,11 @@ Install
 
 See `requirements.txt` for what needs to be installed first.
 
-* Edit `settings_local_sample.py` and save it as `settings_local.py`.
+* Edit `local_settings.sample.py` and save it as `local_settings.py`.
 * Create database:
 
         python manage.py syncdb
-        python manage.py migrate accounts
+        python manage.py migrate main
 
 * Configure your web server or just run `python manage.py runserver`
 
