@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec exim -bdf -q30m

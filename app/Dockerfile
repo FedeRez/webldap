@@ -4,6 +4,7 @@ MAINTAINER Bertrand Bonnefoy-Claudet <bertrandbc@gmail.com>
 RUN apt-wrap apt-get update \
     && apt-wrap apt-get install -y --no-install-recommends \
            build-essential libldap2-dev libffi-dev python3 python3-dev python3-pip \
+           exim4 \
 
     # Clean up
     && apt-wrap apt-get clean \

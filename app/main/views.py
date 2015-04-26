@@ -19,6 +19,11 @@ def one(singleton):
     (e,) = singleton
     return e
 
+def form(ctx, template, request):
+    c = ctx
+    c.update(csrf(request))
+    return render_to_response(template, c, context_instance=RequestContext(request))
+
 # Context processor
 def session_info(request):
     return { 'logged_in': request.session.get('ldap_connected', False),
@@ -115,57 +120,63 @@ def profile(request, l):
 @connect_ldap
 def profile_edit(request, l):
     me = l.get_entry(request.session['ldap_binddn'])
-
-    if request.method == 'POST':
-        f = ProfileForm(request.POST)
-        if f.is_valid():
-            name = f.cleaned_data['name']
-            nick = f.cleaned_data['nick']
-            if name != me.displayName or nick != one(me.cn):
-                me.displayName = f.cleaned_data['name']
-                me.cn = f.cleaned_data['nick']
-                me.save()
-
-            passwd_new = f.cleaned_data['passwd']
-            email_new = f.cleaned_data['email']
-
-            if passwd_new:
-                me.set_password(passwd_new)
-                request.session['ldap_passwd'] = passwd_new
-
-            if email_new != one(me.mail):
-                req = Request()
-                req.type = Request.EMAIL
-                req.uid = one(me.uid)
-                req.email = email_new
-                req.save()
-
-                t = loader.get_template('main/email_email_request')
-                c = Context({
-                        'name': me.displayName,
-                        'url': request.build_absolute_uri(
-                                         reverse(process, kwargs={ 'token': req.token })),
-                        'expire_in': settings.REQ_EXPIRE_STR,
-                        })
-                send_mail('Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
-                          [req.email], fail_silently=False)
-                messages.success(request, 'Un email vous a été envoyé pour confirmer votre nouvelle adresse email')
-
-            return HttpResponseRedirect('/')
-
-    else:
+    if request.method != 'POST':
         f = ProfileForm(label_suffix='', initial={ 'email': one(me.mail),
                                                    'name': me.displayName,
                                                    'nick': one(me.cn) })
+        ctx = { 'form': f, 'name': me.displayName, 'nick': one(me.cn),
+                'email': one(me.mail) }
 
-    c = { 'form': f,
-          'name': me.displayName,
-          'nick': one(me.cn),
-          'email': one(me.mail) }
-    c.update(csrf(request))
+        return form(ctx, 'main/edit.html', request)
 
-    return render_to_response('main/edit.html', c,
-                              context_instance=RequestContext(request))
+    f = ProfileForm(request.POST)
+    ctx = { 'form': f, 'name': me.displayName, 'nick': one(me.cn), 'email': one(me.mail) }
+
+    if not f.is_valid():
+        return form(ctx, 'main/edit.html', request)
+
+    name = f.cleaned_data['name']
+    nick = f.cleaned_data['nick']
+
+    if name != me.displayName or nick != one(me.cn):
+        try:
+            me.displayName = f.cleaned_data['name']
+            me.cn = f.cleaned_data['nick']
+            me.save()
+        except ldapom.error.LDAPError:
+            messages.error(request, 'Pseudo déjà pris ?')
+            return form(ctx, 'main/edit.html', request)
+
+    passwd_new = f.cleaned_data['passwd']
+    email_new = f.cleaned_data['email']
+
+    if passwd_new:
+        try:
+            me.set_password(passwd_new)
+            request.session['ldap_passwd'] = passwd_new
+        except ldapom.error.LDAPError:
+            messages.error(request, 'Mot de passe trop court ?')
+            return form(ctx, 'main/edit.html', request)
+
+    if email_new != one(me.mail):
+        req = Request()
+        req.type = Request.EMAIL
+        req.uid = one(me.uid)
+        req.email = email_new
+        req.save()
+
+        t = loader.get_template('main/email_email_request')
+        c = Context({ 'name': me.displayName,
+                      'url': request.build_absolute_uri(
+                          reverse(process, kwargs={ 'token': req.token })),
+                      'expire_in': settings.REQ_EXPIRE_STR })
+        send_mail('Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
+                  [req.email], fail_silently=False)
+        messages.success(request, 'Un email vous a été envoyé pour confirmer'
+                                  ' votre nouvelle adresse email')
+        return HttpResponseRedirect('/')
+
+    return form(ctx, 'main/edit.html', request)
 
 @connect_ldap
 def org(request, l, uid):
@@ -339,71 +350,65 @@ def process(request, token):
         return error(request, 'Entrée incorrecte, contactez un admin')
 
 def process_account(request, req):
-    if request.method == 'POST':
-        f = ProcessAccountForm(request.POST)
-        if f.is_valid():
-            l = ldapom.LDAPConnection(uri=settings.LDAP_URI,
-                    base=settings.LDAP_BASE,
-                    bind_dn=settings.LDAP_WEBLDAP_USER,
-                    bind_password=settings.LDAP_WEBLDAP_PASSWD)
-            user = l.get_entry('uid=%s,ou=users,%s' % (req.uid, settings.LDAP_BASE))
-
-            if user.exists():
-                messages.error(request, 'Compte déjà créé')
-                return HttpResponseRedirect('/')
-
-            user.objectClass = 'inetOrgPerson'
-            user.uid = req.uid
-            user.displayName = req.name
-            user.mail = req.email
-            user.cn = f.cleaned_data['nick']
-            user.sn = 'CHANGEIT!' # TODO
-            try:
-                user.save()
-                user.set_password(f.cleaned_data['passwd'])
-
-                if req.org_uid:
-                    org = l.get_entry('o=%s,ou=associations,%s' \
-                                          % (req.org_uid, settings.LDAP_BASE))
-                    org.uniqueMember.add(user.dn)
-                    org.save()
-
-                for group in settings.LDAP_DEFAULT_GROUPS:
-                    group = l.get_entry('cn=%s,ou=accesses,ou=groups,%s' \
-                                            % (group, settings.LDAP_BASE))
-                    group.uniqueMember.add(user.dn)
-                    group.save()
-
-                for role in settings.LDAP_DEFAULT_ROLES:
-                    role = l.get_entry('cn=%s,ou=roles,%s' \
-                                           % (role, settings.LDAP_BASE))
-                    role.roleOccupant.add(user.dn)
-                    role.save()
-
-                req.delete()
-            except ldapom.error.LDAPError as e:
-                if e.args[0] == 'Constraint violation':
-                    messages.error(request, 'Pseudo déjà pris')
-                else:
-                    raise e
-            else:
-                messages.success(request, 'Compte créé')
-
-                return HttpResponseRedirect('/')
-
-            c = { 'form': f }
-            c.update(csrf(request))
-
-            return render_to_response('main/process_account.html', c,
-                                      context_instance=RequestContext(request))
-    else:
+    if request.method != 'POST':
         f = ProcessAccountForm(label_suffix='')
+        return form({ 'form': f }, 'main/process_account.html', request)
 
-    c = { 'form': f }
-    c.update(csrf(request))
+    f = ProcessAccountForm(request.POST)
+    if not f.is_valid():
+        return form({ 'form': f }, 'main/process_account.html', request)
 
-    return render_to_response('main/process_account.html', c,
-                              context_instance=RequestContext(request))
+    l = ldapom.LDAPConnection(uri=settings.LDAP_URI,
+            base=settings.LDAP_BASE,
+            bind_dn=settings.LDAP_WEBLDAP_USER,
+            bind_password=settings.LDAP_WEBLDAP_PASSWD)
+    user = l.get_entry('uid=%s,ou=users,%s' % (req.uid, settings.LDAP_BASE))
+
+    if user.exists():
+        messages.error(request, 'Compte déjà créé')
+        return HttpResponseRedirect('/')
+
+    user.objectClass = 'inetOrgPerson'
+    user.uid = req.uid
+    user.displayName = req.name
+    user.mail = req.email
+    user.cn = f.cleaned_data['nick']
+    user.sn = 'CHANGEIT!' # TODO
+
+    try:
+        user.save()
+    except ldapom.error.LDAPError:
+        messages.error(request, 'Pseudo déjà pris ?')
+        return form({ 'form': f }, 'main/process_account.html', request)
+
+    try:
+        user.set_password(f.cleaned_data['passwd'])
+    except ldapom.error.LDAPError:
+        user.delete()
+        messages.error(request, 'Mot de passe trop court ?')
+        return form({ 'form': f }, 'main/process_account.html', request)
+
+    if req.org_uid:
+        org = l.get_entry('o=%s,ou=associations,%s' \
+                              % (req.org_uid, settings.LDAP_BASE))
+        org.uniqueMember.add(user.dn)
+        org.save()
+
+    for group in settings.LDAP_DEFAULT_GROUPS:
+        group = l.get_entry('cn=%s,ou=accesses,ou=groups,%s' \
+                                % (group, settings.LDAP_BASE))
+        group.uniqueMember.add(user.dn)
+        group.save()
+
+    for role in settings.LDAP_DEFAULT_ROLES:
+        role = l.get_entry('cn=%s,ou=roles,%s' \
+                               % (role, settings.LDAP_BASE))
+        role.roleOccupant.add(user.dn)
+        role.save()
+
+    req.delete()
+    messages.success(request, 'Compte créé')
+    return HttpResponseRedirect('/')
 
 @sensitive_post_parameters()
 def process_passwd(request, req):

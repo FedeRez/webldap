@@ -43,8 +43,8 @@ LDAP_CACERT = ''
 # LDAP base DN
 LDAP_BASE = 'dc=example,dc=net'
 
-# LDAP application DN (without the base)
-LDAP_WEBLDAP_USER = 'uid=webldap,ou=apps'
+# LDAP application DN
+LDAP_WEBLDAP_USER = 'uid=webldap,ou=apps,dc=example,dc=net'
 
 # LDAP application password
 LDAP_WEBLDAP_PASSWD = 'secret'
