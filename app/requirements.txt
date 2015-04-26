@@ -1,3 +1,2 @@
 Django==1.6
-South>=0.7.5
 ldapom>=0.11.0
