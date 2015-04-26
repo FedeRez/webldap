@@ -265,13 +265,8 @@ def org_add(request, l, uid):
     else:
         f = RequestAccountForm(label_suffix='')
 
-    c = { 'form': f,
-          'name': one(org.cn),
-          'uid': uid }
-    c.update(csrf(request))
-
-    return render_to_response('main/org_add.html', c,
-                              context_instance=RequestContext(request))
+    return form({ 'form': f, 'name': one(org.cn), 'uid': uid }, 'main/org_add.html',
+                request)
 
 @connect_ldap
 def admin(request, l):
@@ -324,11 +319,7 @@ def passwd(request):
     else:
         f = RequestPasswdForm(label_suffix='')
 
-    c = { 'form': f }
-    c.update(csrf(request))
-
-    return render_to_response('main/passwd.html', c,
-                                  context_instance=RequestContext(request))
+    return form({ 'form': f }, 'main/passwd.html', request)
 
 def process(request, token):
     valid_reqs = Request.objects.filter(expires_at__gt=timezone.now())
@@ -422,11 +413,7 @@ def process_passwd(request, req):
     else:
         f = ProcessPasswdForm(label_suffix='')
 
-    c = { 'form': f }
-    c.update(csrf(request))
-
-    return render_to_response('main/process_passwd.html', c,
-                              context_instance=RequestContext(request))
+    return form({ 'form': f }, 'main/process_passwd.html', request)
 
 @connect_ldap
 def process_email(request, l, req):
