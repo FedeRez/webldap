@@ -6,7 +6,6 @@ MANAGERS = ADMINS
 
 TIME_ZONE = 'Europe/Paris'
 LANGUAGE_CODE = 'fr-fr'
-SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -40,7 +39,6 @@ WSGI_APPLICATION = 'webldap.wsgi.application'
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
