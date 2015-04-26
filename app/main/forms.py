@@ -3,20 +3,21 @@ from main.models import Request
 
 def uid_field():
     return forms.CharField(max_length=200,
-                            label='identifiant ',
-                            widget=forms.TextInput(attrs={ 'placeholder': 'prenom.nom' }))
+                           label='identifiant ',
+                           widget=forms.TextInput(attrs={ 'placeholder': 'prenom.nom' }))
 def passwd_field(required=True):
-    return forms.CharField(widget=forms.PasswordInput(attrs={ 'placeholder': '8 caractères minimum' }),
-                           label='mot de passe', required=required)
+    return forms.CharField(
+        widget=forms.PasswordInput(attrs={ 'placeholder': '8 caractères minimum' }),
+        label='mot de passe', required=required)
 
 def passwd_confirm_field(required=True):
-    return forms.CharField(widget=forms.PasswordInput(attrs={ 'placeholder': 'répéter le mot de passe' }),
-                           label='', required=required)
+    return forms.CharField(
+        widget=forms.PasswordInput(attrs={ 'placeholder': 'répéter le mot de passe' }),
+        label='', required=required)
 
 def name_field():
-    return forms.CharField(max_length=200,
-                           label='nom ',
-                       widget=forms.TextInput(attrs={ 'placeholder': 'Prénom Nom' }))
+    return forms.CharField(max_length=200, label='nom ',
+                           widget=forms.TextInput(attrs={ 'placeholder': 'Prénom Nom' }))
 
 def nick_field():
     return forms.CharField(max_length=100, label='pseudo')
