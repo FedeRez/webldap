@@ -1,4 +1,3 @@
-# coding=utf8
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import Context, RequestContext, loader

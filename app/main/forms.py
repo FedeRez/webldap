@@ -1,4 +1,3 @@
-# coding=utf8
 from django import forms
 from main.models import Request
 
