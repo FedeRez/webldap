@@ -2,5 +2,5 @@
 
 cd /srv/webldap
 
-webldap-wrap python3 manage.py syncdb
+webldap-wrap python3 manage.py migrate
 exec webldap-wrap python3 manage.py runserver 0.0.0.0:8000

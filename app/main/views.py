@@ -5,7 +5,6 @@ from django.template import Context, RequestContext, loader
 from django.core.context_processors import csrf
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib import messages
@@ -31,19 +30,18 @@ def session_info(request):
              'is_admin': request.session.get('is_admin', False) }
 
 # View decorator
-def connect_ldap(view, login_url='/login', redirect_field_name=REDIRECT_FIELD_NAME):
+def connect_ldap(view, login_url='/login'):
     def _view(request, *args, **kwargs):
         if not request.session.get('ldap_connected', False):
             path = request.get_full_path()
-            from django.contrib.auth.views import redirect_to_login
-            return redirect_to_login(path, login_url, redirect_field_name)
+            return HttpResponseRedirect('{}?next={}'.format(login_url, path))
         try:
             l = ldapom.LDAPConnection(uri=settings.LDAP_URI,
                     base=settings.LDAP_BASE,
                     bind_dn=request.session['ldap_binddn'],
                     bind_password=request.session['ldap_passwd'])
         except (KeyError, ldapom.error.LDAPInvalidCredentialsError):
-            return logout(request, redirect_field_name)
+            return logout(request)
 
         # Login successful, check if admin
         if request.session.get('is_admin', None) is None:
@@ -58,11 +56,12 @@ def error(request, error_msg):
     return render_to_response('main/error.html', { 'error_msg': error_msg },
                               context_instance=RequestContext(request))
 
-def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
-    redirect_to = request.REQUEST.get(redirect_field_name, '/')
+def login(request):
+    redirect_to = request.GET.get('next', '/')
 
     if request.method == 'POST':
         f = LoginForm(request.POST)
+
         if f.is_valid():
             request.session['ldap_connected'] = True
             request.session['ldap_binduid'] = f.cleaned_data['uid']
@@ -73,14 +72,10 @@ def login(request, redirect_field_name=REDIRECT_FIELD_NAME):
     else:
         f = LoginForm(label_suffix='')
 
-    c = { 'form': f, redirect_field_name: redirect_to }
-    c.update(csrf(request))
+    return form({ 'form': f }, 'main/login.html', request)
 
-    return render_to_response('main/login.html', c,
-                              context_instance=RequestContext(request))
-
-def logout(request, redirect_field_name=REDIRECT_FIELD_NAME, next=None):
-    redirect_to = next or request.REQUEST.get(redirect_field_name, '/')
+def logout(request, next=None):
+    redirect_to = next or request.GET.get('next', '/')
     request.session.flush()
 
     return HttpResponseRedirect(redirect_to)
