@@ -1,53 +1,78 @@
 FedeRez LDAP web interface
 ==========================
 
-**webLDAP** gives users access to their LDAP accounts and eases the management
-of such accounts by organization managers and administrators.
-
-Technology
-----------
-
-Views rely on **ldapom** to issue LDAP requests. This library is built upon
-the python-ldap module.
-
-This project differs quite a lot from usual Django projects because of the lack
-of ORM-style managers for LDAP. That's why the authentication backend and many
-useful Django modules are not used.
+**webLDAP** enables users to access their LDAP accounts and eases the management of such
+accounts by administrators.
 
 Architecture
 ------------
 
-This Django project is meant to be simple. One app `main` inside the `webldap` project.
+The project is called `webldap` and the only application in it is `main`.
 
 Main files:
 
     webldap/
         settings.py: project settings
-        local_settings.sample.py: sample settings to be completed and renamed
+        local_settings.sample.py: sample settings
+        local_settings.docker.py: Docker-specific settings
     main/
         views.py: view functions (no class-based views)
-        migrations: South migrations
         static/: static content
 
 Install
 -------
 
-See `requirements.txt` for what needs to be installed first.
+### Normal
 
-* Edit `local_settings.sample.py` and save it as `local_settings.py`.
-* Create database:
+See `app/requirements.txt` for what needs to be installed first.
 
-        python manage.py syncdb
+* In `app/webldap`, copy `local_settings.sample.py` to `local_settings.py` and edit the
+  latter with your settings.
+* Create the database:
 
-* Configure your web server or just run `python manage.py runserver`
+        python manage.py migrate
 
-And you're set!
+* Configure your web server, or just run `python manage.py runserver` if you are
+  testing the software.
+
+### Docker (development only)
+
+You need both [Docker](https://www.docker.com) and
+[docker-compose](https://docs.docker.com/compose/).  It is recommended you get familiar
+with Docker before using it for this project.
+
+* Copy `secret.sample.yml` to `secret.yml` and edit it with the password you want to use.
+* In `app/webldap`, copy `local_settings.docker.py` to `local_settings.py` and edit the
+  secret key and the password.
+* To initialize the LDAP database and start the server, run:
+
+        docker-compose run ldap /usr/bin/slapd-init
+        docker-compose up
+
+  It should then be running on `http://localhost:8000`.
+
+To take modifications into account:
+
+```
+docker-compose rm -f
+docker-compose build
+docker-compose up
+```
+
+To reset the LDAP database:
+
+```
+docker-compose rm -f
+docker-compose run ldap /usr/bin/slapd-init
+docker-compose up
+```
+
+If slapd crashes when it starts, try to raise the available RAM on your development
+machine to at least 1&nbsp;Gio.
 
 Using and contributing
 ----------------------
 
-webldap is licensed under the MIT license. For more information, see the
-`LICENSE` file.
+webldap is licensed under the MIT license. For more information, see the `LICENSE` file.
 
-You are welcome to contribute to this project, preferably by pull requests or
-email.
+You are welcome to contribute to this project, preferably by pull requests or email.

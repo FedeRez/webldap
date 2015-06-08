@@ -1,19 +1,19 @@
 webldap:
-    build: app
-    ports:
-        - 8000:8000
-    links:
-        - ldap
+  build: app
+  ports:
+  - 8000:8000
+  links:
+  - ldap
 
 ldap:
-    extends:
-        file: docker/secret.yml
-        service: env
-    build: docker/ldap
-    volumes:
-        - docker/db/conf:/etc/ldap/slapd.d
-        - docker/db/main:/var/lib/ldap
-        - docker/files:/tmp/ldap
-    environment:
-        - LDAP_DOMAIN=example.net
-        - LDAP_ORG=Example
+  extends:
+    file: docker/secret.yml
+    service: env
+  build: docker/ldap
+  volumes:
+  - docker/db/conf:/etc/ldap/slapd.d
+  - docker/db/main:/var/lib/ldap
+  - docker/files:/tmp/ldap
+  environment:
+  - LDAP_DOMAIN=example.net
+  - LDAP_ORG=Example
