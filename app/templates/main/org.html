@@ -24,6 +24,7 @@
   {% endif %}
   {% if is_admin %}
   | <a href="/org/{{ uid }}/enable_ssh/{{ member.uid }}/">activer ssh</a>
+  | <a href="/org/{{ uid }}/enable_admin/{{ member.uid }}/">activer admin</a>
   {% endif %}
 </li>
 {% endfor %}

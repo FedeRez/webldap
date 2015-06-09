@@ -325,6 +325,29 @@ def enable_ssh(request, l, uid, user_uid):
     return HttpResponseRedirect('/org/{}'.format(uid))
 
 @connect_ldap
+def enable_admin(request, l, uid, user_uid):
+    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
+    sudo_ssh = l.get_entry('cn=sudoldap,ou=posix,ou=groups,{}'.format(settings.LDAP_BASE))
+    admin = l.get_entry('cn=admin,ou=roles,{}'.format(settings.LDAP_BASE))
+
+    if not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes pas admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    if not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
+        messages.error(request, 'Il faut ajouter le membre au groupe ssh avant')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    sudo_ssh.memberUid.add(one(user.netFederezUID))
+    sudo_ssh.save()
+
+    admin.roleOccupant.add(user.dn)
+    admin.save()
+
+    messages.success(request, '{} est désormais admin et a des accès sudo sur les serveurs'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
+
+@connect_ldap
 def admin(request, l):
     me = l.get_entry(request.session['ldap_binddn'])
 
