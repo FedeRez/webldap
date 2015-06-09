@@ -14,6 +14,7 @@ from .models import Request
 
 from webldap import settings
 import ldapom
+import re
 
 def one(singleton):
     (e,) = singleton
@@ -268,6 +269,60 @@ def org_add(request, l, uid):
 
     return form({ 'form': f, 'name': one(org.cn), 'uid': uid }, 'main/org_add.html',
                 request)
+
+@connect_ldap
+def enable_ssh(request, l, uid, user_uid):
+    ssh = l.get_entry('cn=ssh,ou=accesses,ou=groups,{}'.format(settings.LDAP_BASE))
+    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
+
+    if not user.exists():
+        raise Http404
+
+    if not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes pas admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    # Find free uid and gid for the user
+    used_uid = [u.uidNumber for u in l.search('(uidNumber=*)')]
+    used_gid = [u.gidNumber for u in l.search('(gidNumber=*)')]
+
+    uid_number = 10000
+    while uid_number in used_uid or uid_number in used_gid:
+        uid_number += 1
+
+    # Ensure the netFederezUID we choose has not already been taken
+    federez_uid = re.sub(r'[^a-zA-Z]+', '', one(user.cn)).lower()
+    if not list(l.search('netFederezUID={}'.format(federez_uid))) == [] \
+            and not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
+        messages.error(request, 'Le netFederezUid est déjà utilisé')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    # Add required attributes (POSIX, netFederezUser)
+    user.objectClass.add('shadowAccount')
+    user.objectClass.add('netFederezUser')
+    user.objectClass.add('posixAccount')
+    user.gidNumber = uid_number
+    user.homeDirectory = '/home/' + one(user.cn)
+    user.loginShell = '/bin/bash'
+    user.netFederezUID = federez_uid
+    user.shadowMax = 99999
+    user.shadowMin = 0
+    user.shadowWarning = 7
+    user.uidNumber = uid_number
+    user.save()
+
+    ssh.uniqueMember.add(user.dn)
+    ssh.save()
+
+    group = l.get_entry('cn={},ou=posix,ou=groups,{}'.format(one(user.netFederezUID), settings.LDAP_BASE))
+    group.objectClass = 'posixGroup'
+    group.cn = one(user.netFederezUID)
+    group.gidNumber = uid_number
+    group.memberUid = one(user.netFederezUID)
+    group.save()
+
+    messages.success(request, '{} a désormais des accès SSH'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
 
 @connect_ldap
 def admin(request, l):

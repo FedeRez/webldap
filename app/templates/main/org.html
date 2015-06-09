@@ -22,6 +22,9 @@
   (gérant)
   {% endif %}
   {% endif %}
+  {% if is_admin %}
+  | <a href="/org/{{ uid }}/enable_ssh/{{ member.uid }}/">activer ssh</a>
+  {% endif %}
 </li>
 {% endfor %}
 </ul>
