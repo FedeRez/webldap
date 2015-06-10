@@ -176,6 +176,8 @@ def profile_edit(request, l):
 @connect_ldap
 def org(request, l, uid):
     org = l.get_entry('o={},ou=associations,{}'.format(uid, settings.LDAP_BASE))
+    admin = l.get_entry('cn=admin,ou=roles,{}'.format(settings.LDAP_BASE))
+    ssh = l.get_entry('cn=ssh,ou=accesses,ou=groups,{}'.format(settings.LDAP_BASE))
 
     if not org.exists():
         raise Http404
@@ -186,6 +188,8 @@ def org(request, l, uid):
         'uid': one(member.uid),
         'name': member.displayName,
         'owner': member.dn in org.owner,
+        'is_admin': member.dn in admin.roleOccupant,
+        'is_ssh': member.dn in ssh.uniqueMember,
     } for member in search]
 
     return render_to_response('main/org.html', {
@@ -325,6 +329,21 @@ def enable_ssh(request, l, uid, user_uid):
     return HttpResponseRedirect('/org/{}'.format(uid))
 
 @connect_ldap
+def disable_ssh(request, l, uid, user_uid):
+    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
+    ssh = l.get_entry('cn=ssh,ou=accesses,ou=groups,{}'.format(settings.LDAP_BASE))
+
+    if not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes pas admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    ssh.uniqueMember.discard(user.dn)
+    ssh.save()
+
+    messages.success(request, '{} n\'a plus d\'accès SSH'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
+
+@connect_ldap
 def enable_admin(request, l, uid, user_uid):
     user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
     sudo_ssh = l.get_entry('cn=sudoldap,ou=posix,ou=groups,{}'.format(settings.LDAP_BASE))
@@ -345,6 +364,25 @@ def enable_admin(request, l, uid, user_uid):
     admin.save()
 
     messages.success(request, '{} est désormais admin et a des accès sudo sur les serveurs'.format(user.displayName))
+    return HttpResponseRedirect('/org/{}'.format(uid))
+
+@connect_ldap
+def disable_admin(request, l, uid, user_uid):
+    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
+    sudo_ssh = l.get_entry('cn=sudoldap,ou=posix,ou=groups,{}'.format(settings.LDAP_BASE))
+    admin = l.get_entry('cn=admin,ou=roles,{}'.format(settings.LDAP_BASE))
+
+    if not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes pas admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    sudo_ssh.memberUid.discard(one(user.netFederezUID))
+    sudo_ssh.save()
+
+    admin.roleOccupant.discard(user.dn)
+    admin.save()
+
+    messages.success(request, '{} n\'est plus admin et ses accès ssh sudo ont été révoqués'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
 
 @connect_ldap

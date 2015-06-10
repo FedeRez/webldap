@@ -23,8 +23,16 @@
   {% endif %}
   {% endif %}
   {% if is_admin %}
+  {% if member.is_ssh %}
+  | <a href="/org/{{ uid }}/disable_ssh/{{ member.uid }}/">désactiver ssh</a>
+  {% else %}
   | <a href="/org/{{ uid }}/enable_ssh/{{ member.uid }}/">activer ssh</a>
+  {% endif %}
+  {% if member.is_admin %}
+  | <a href="/org/{{ uid }}/disable_admin/{{ member.uid }}/">désactiver admin</a>
+  {% else %}
   | <a href="/org/{{ uid }}/enable_admin/{{ member.uid }}/">activer admin</a>
+  {% endif %}
   {% endif %}
 </li>
 {% endfor %}
