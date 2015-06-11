@@ -105,7 +105,7 @@ objectClass: organizationalUnit
 ou: posix
 description: POSIX groups
 
-dn: cn=john.doe,ou=posix,ou=groups,dc=example,dc=net
+dn: cn=john,ou=posix,ou=groups,dc=example,dc=net
 objectClass: posixGroup
 gidNumber: 10001
 cn: john
