@@ -274,18 +274,7 @@ def org_add(request, l, uid):
     return form({ 'form': f, 'name': one(org.cn), 'uid': uid }, 'main/org_add.html',
                 request)
 
-@connect_ldap
-def enable_ssh(request, l, uid, user_uid):
-    ssh = l.get_entry('cn=ssh,ou=accesses,ou=groups,{}'.format(settings.LDAP_BASE))
-    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
-
-    if not user.exists():
-        raise Http404
-
-    if not request.session['is_admin']:
-        messages.error(request, 'Vous n\'êtes pas admin')
-        return HttpResponseRedirect('/org/{}'.format(uid))
-
+def make_posix(l, user):
     # Find free uid and gid for the user
     used_uid = [u.uidNumber for u in l.search('(uidNumber=*)')]
     used_gid = [u.gidNumber for u in l.search('(gidNumber=*)')]
@@ -294,14 +283,12 @@ def enable_ssh(request, l, uid, user_uid):
     while uid_number in used_uid or uid_number in used_gid:
         uid_number += 1
 
-    # Ensure the netFederezUID we choose has not already been taken
-    federez_uid = re.sub(r'[^a-zA-Z]+', '', one(user.cn)).lower()
-    if not list(l.search('netFederezUID={}'.format(federez_uid))) == [] \
-            and not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
-        messages.error(request, 'Le netFederezUid est déjà utilisé')
-        return HttpResponseRedirect('/org/{}'.format(uid))
+    federez_uid = re.sub(r'[^a-zA-Z]+', '', one(user.cn))
 
-    # Add required attributes (POSIX, netFederezUser)
+    # Ensure the netFederezUID has not already been taken
+    if not list(l.search('netFederezUID={}'.format(federez_uid))) == []:
+        return 'Le pseudo est déjà utilisé, impossible d\'ajouter un accès ssh'
+
     user.objectClass.add('shadowAccount')
     user.objectClass.add('netFederezUser')
     user.objectClass.add('posixAccount')
@@ -315,15 +302,34 @@ def enable_ssh(request, l, uid, user_uid):
     user.uidNumber = uid_number
     user.save()
 
-    ssh.uniqueMember.add(user.dn)
-    ssh.save()
-
     group = l.get_entry('cn={},ou=posix,ou=groups,{}'.format(one(user.netFederezUID), settings.LDAP_BASE))
     group.objectClass = 'posixGroup'
     group.cn = one(user.netFederezUID)
     group.gidNumber = uid_number
     group.memberUid = one(user.netFederezUID)
     group.save()
+
+@connect_ldap
+def enable_ssh(request, l, uid, user_uid):
+    ssh = l.get_entry('cn=ssh,ou=accesses,ou=groups,{}'.format(settings.LDAP_BASE))
+    user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
+
+    if not user.exists():
+        raise Http404
+
+    if not request.session['is_admin']:
+        messages.error(request, 'Vous n\'êtes pas admin')
+        return HttpResponseRedirect('/org/{}'.format(uid))
+
+    # Ensure the user has POSIX and netFederezUser attributes
+    if not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
+        posix = make_posix(l, user)
+        if posix is not None:
+            messages.error(request, posix)
+            return HttpResponseRedirect('/org/{}'.format(uid))
+
+    ssh.uniqueMember.add(user.dn)
+    ssh.save()
 
     messages.success(request, '{} a désormais des accès SSH'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
