@@ -419,7 +419,7 @@ def passwd(request):
                                       bind_dn=settings.LDAP_WEBLDAP_USER,
                                       bind_password=settings.LDAP_WEBLDAP_PASSWD)
             try:
-                user = list(l.search('(&(uid={})(mail={}))'.format((req.uid, req.email)),
+                user = list(l.search('(&(uid={})(mail={}))'.format(req.uid, req.email),
                                      base='ou=users,{}'.format(settings.LDAP_BASE)))[0]
             except IndexError:
                 messages.error(request, 'Données incorrectes')
