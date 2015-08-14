@@ -11,9 +11,9 @@ ldap:
     service: env
   build: docker/ldap
   volumes:
-  - docker/db/conf:/etc/ldap/slapd.d
-  - docker/db/main:/var/lib/ldap
-  - docker/files:/tmp/ldap
+  - ./docker/db/conf:/etc/ldap/slapd.d
+  - ./docker/db/main:/var/lib/ldap
+  - ./docker/files:/tmp/ldap
   environment:
   - LDAP_DOMAIN=example.net
   - LDAP_ORG=Example
