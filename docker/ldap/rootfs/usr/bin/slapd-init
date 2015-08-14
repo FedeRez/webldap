@@ -11,7 +11,7 @@ echo $(hl "Organization: $LDAP_ORG")
 echo $(hl "Admin password: $LDAP_ADMIN_PASSWD")
 
 # Stop slapd.
-s6-svc -dD /var/run/s6/services/slapd/
+s6-svc -wD /var/run/s6/services/slapd/
 
 rm -rf /var/lib/ldap/*
 rm -rf /etc/ldap/slapd.d/*
