@@ -66,6 +66,7 @@ def login(request):
         f = LoginForm(request.POST)
 
         if f.is_valid():
+            request.session.flush()
             request.session['ldap_connected'] = True
             request.session['ldap_binduid'] = f.cleaned_data['uid']
             request.session['ldap_binddn'] = 'uid={},ou=users,{}' \
