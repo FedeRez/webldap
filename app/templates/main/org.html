@@ -8,7 +8,7 @@
 {% if is_owner or is_admin %}<a href="add">ajouter un membre</a>{% endif %}
 {% if members %}
 <ul>
-{% for member in members %}
+{% for member in members|dictsort:'name' %}
 <li>
   {{ member.name }}
   {% if is_owner or is_admin %}
