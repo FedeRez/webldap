@@ -74,6 +74,12 @@ nav {
   padding: .3em .7em;
 }
 
+#messages .error {
+  color: #D10000;
+  background: #FFE1E1;
+  border-color: #FF9B9B;
+}
+
 #messages .success {
   color: #3A4;
   background: #DFD;

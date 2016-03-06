@@ -43,6 +43,7 @@ def connect_ldap(view, login_url='/login'):
                                       bind_dn=request.session['ldap_binddn'],
                                       bind_password=request.session['ldap_passwd'])
         except (KeyError, ldapom.error.LDAPInvalidCredentialsError):
+            messages.error(request, 'Identifiants incorrects.')
             return logout(request)
 
         # Login successful, check if admin
