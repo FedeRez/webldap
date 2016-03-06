@@ -114,6 +114,14 @@ a:hover {
   text-decoration: underline;
 }
 
+a.admin-disable-action {
+    color: #ff0040;
+}
+
+a.admin-enable-action {
+    color: #3aaf60;
+}
+
 label {
     font-size: .9em;
     font-weight: normal;
