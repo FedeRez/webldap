@@ -1,8 +1,9 @@
+import datetime
 from django.db import models
 from django.utils import timezone
+import uuid
 from webldap import settings
 
-import datetime, uuid
 
 class Request(models.Model):
     ACCOUNT = 'AC'
@@ -25,7 +26,7 @@ class Request(models.Model):
     def save(self):
         if not self.expires_at:
             self.expires_at = timezone.now() \
-                            + datetime.timedelta(hours=settings.REQ_EXPIRE_HRS)
+                + datetime.timedelta(hours=settings.REQ_EXPIRE_HRS)
         if not self.token:
-            self.token = str(uuid.uuid4()).replace('-', '') # remove hyphens
+            self.token = str(uuid.uuid4()).replace('-', '')  # remove hyphens
         super(Request, self).save()
