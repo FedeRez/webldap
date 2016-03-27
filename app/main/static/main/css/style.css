@@ -145,6 +145,7 @@ input[type="text"], input[type="password"], input[type="email"] {
     width: 17em;
     padding: .3em .5em;
     box-shadow: 0 4px 1em rgba(0, 0, 0, 0.08) inset;
+    background-color: #FFF;
 }
 
 input[type="submit"] {
