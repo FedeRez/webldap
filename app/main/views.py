@@ -556,7 +556,13 @@ def process_passwd(request, req):
                                       bind_dn=settings.LDAP_WEBLDAP_USER,
                                       bind_password=settings.LDAP_WEBLDAP_PASSWD)
             user = l.get_entry('uid={},ou=users,{}'.format(req.uid, settings.LDAP_BASE))
-            user.set_password(f.cleaned_data['passwd'])
+
+            try:
+                user.set_password(f.cleaned_data['passwd'])
+            except ldapom.error.LDAPError:
+                messages.error(request, 'Mot de passe trop court ?')
+                return form({'form': f}, 'main/process_passwd.html', request)
+
             req.delete()
             messages.success(request, 'Mot de passe changé')
 
