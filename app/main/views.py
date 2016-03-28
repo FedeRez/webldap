@@ -16,20 +16,24 @@ from webldap import settings
 import ldapom
 import re
 
+
 def one(singleton):
     (e,) = singleton
     return e
+
 
 def form(ctx, template, request):
     c = ctx
     c.update(csrf(request))
     return render_to_response(template, c, context_instance=RequestContext(request))
 
+
 # Context processor
 def session_info(request):
-    return { 'logged_in': request.session.get('ldap_connected', False),
-             'logged_uid': request.session.get('ldap_binduid', None),
-             'is_admin': request.session.get('is_admin', False) }
+    return {'logged_in': request.session.get('ldap_connected', False),
+            'logged_uid': request.session.get('ldap_binduid', None),
+            'is_admin': request.session.get('is_admin', False)}
+
 
 # View decorator
 def connect_ldap(view, login_url='/login'):
@@ -55,9 +59,11 @@ def connect_ldap(view, login_url='/login'):
         return view(request, l=l, *args, **kwargs)
     return _view
 
+
 def error(request, error_msg):
-    return render_to_response('main/error.html', { 'error_msg': error_msg },
+    return render_to_response('main/error.html', {'error_msg': error_msg},
                               context_instance=RequestContext(request))
+
 
 def login(request):
     redirect_to = request.GET.get('next', '/')
@@ -76,13 +82,15 @@ def login(request):
     else:
         f = LoginForm(label_suffix='')
 
-    return form({ 'form': f }, 'main/login.html', request)
+    return form({'form': f}, 'main/login.html', request)
+
 
 def logout(request, next=None):
     redirect_to = next or request.GET.get('next', '/')
     request.session.flush()
 
     return HttpResponseRedirect(redirect_to)
+
 
 @connect_ldap
 def profile(request, l):
@@ -101,7 +109,7 @@ def profile(request, l):
     search.extend(l.search('roleOccupant={}'.format(me.dn),
                            base='ou=roles,{}'.format(settings.LDAP_BASE)))
 
-    groups = [{ 'name': one(group.cn), } for group in search]
+    groups = [{'name': one(group.cn), } for group in search]
 
     return render_to_response('main/profile.html', {
         'uid': me.uid,
@@ -112,22 +120,22 @@ def profile(request, l):
         'groups': groups,
     }, context_instance=RequestContext(request))
 
+
 @sensitive_post_parameters('passwd')
 @sensitive_variables('passwd_new')
 @connect_ldap
 def profile_edit(request, l):
     me = l.get_entry(request.session['ldap_binddn'])
     if request.method != 'POST':
-        f = ProfileForm(label_suffix='', initial={ 'email': one(me.mail),
-                                                   'name': me.displayName,
-                                                   'nick': one(me.cn) })
-        ctx = { 'form': f, 'name': me.displayName, 'nick': one(me.cn),
-                'email': one(me.mail) }
+        f = ProfileForm(label_suffix='', initial={'email': one(me.mail),
+                                                  'name': me.displayName,
+                                                  'nick': one(me.cn)})
+        ctx = {'form': f, 'name': me.displayName, 'nick': one(me.cn), 'email': one(me.mail)}
 
         return form(ctx, 'main/edit.html', request)
 
     f = ProfileForm(request.POST)
-    ctx = { 'form': f, 'name': me.displayName, 'nick': one(me.cn), 'email': one(me.mail) }
+    ctx = {'form': f, 'name': me.displayName, 'nick': one(me.cn), 'email': one(me.mail)}
 
     if not f.is_valid():
         return form(ctx, 'main/edit.html', request)
@@ -163,10 +171,10 @@ def profile_edit(request, l):
         req.save()
 
         t = loader.get_template('main/email_email_request')
-        c = Context({ 'name': me.displayName,
-                      'url': request.build_absolute_uri(
-                          reverse(process, kwargs={ 'token': req.token })),
-                      'expire_in': settings.REQ_EXPIRE_STR })
+        c = Context({'name': me.displayName,
+                     'url': request.build_absolute_uri(
+                         reverse(process, kwargs={'token': req.token})),
+                     'expire_in': settings.REQ_EXPIRE_STR})
         send_mail('Confirmation email FedeRez', t.render(c), settings.EMAIL_FROM,
                   [req.email], fail_silently=False)
         messages.success(request, 'Un email vous a été envoyé pour confirmer'
@@ -174,6 +182,7 @@ def profile_edit(request, l):
         return HttpResponseRedirect('/')
 
     return form(ctx, 'main/edit.html', request)
+
 
 @connect_ldap
 def org(request, l, uid):
@@ -201,6 +210,7 @@ def org(request, l, uid):
         'members': members
     }, context_instance=RequestContext(request))
 
+
 @connect_ldap
 def org_promote(request, l, uid, user_uid):
     org = l.get_entry('o={},ou=associations,{}'.format(uid, settings.LDAP_BASE))
@@ -210,7 +220,7 @@ def org_promote(request, l, uid, user_uid):
         raise Http404
 
     if request.session['ldap_binddn'] not in org.owner \
-    and not request.session['is_admin']:
+            and not request.session['is_admin']:
         messages.error(request, 'Vous n\'êtes ni gérant, ni admin')
         return HttpResponseRedirect('/org/{}'.format(uid))
 
@@ -219,6 +229,7 @@ def org_promote(request, l, uid, user_uid):
 
     messages.success(request, '{} est désormais gérant'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
+
 
 @connect_ldap
 def org_relegate(request, l, uid, user_uid):
@@ -238,6 +249,7 @@ def org_relegate(request, l, uid, user_uid):
 
     messages.success(request, '{} n\'est plus gérant'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
+
 
 @connect_ldap
 def org_add(request, l, uid):
@@ -261,20 +273,22 @@ def org_add(request, l, uid):
             c = Context({
                 'name': req.name,
                 'url': request.build_absolute_uri(
-                    reverse(process, kwargs={ 'token': req.token })),
+                    reverse(process, kwargs={'token': req.token})),
                 'expire_in': settings.REQ_EXPIRE_STR,
             })
             send_mail('Création de compte FedeRez', t.render(c), settings.EMAIL_FROM,
                       [req.email], fail_silently=False)
-            messages.success(request, 'Email envoyé à {} pour la création du compte' \
+            messages.success(request,
+                             'Email envoyé à {} pour la création du compte'
                              .format(req.email))
 
             return HttpResponseRedirect('/org/{}'.format(uid))
     else:
         f = RequestAccountForm(label_suffix='')
 
-    return form({ 'form': f, 'name': one(org.cn), 'uid': uid }, 'main/org_add.html',
+    return form({'form': f, 'name': one(org.cn), 'uid': uid}, 'main/org_add.html',
                 request)
+
 
 def make_posix(l, user):
     # Find free uid and gid for the user
@@ -304,12 +318,14 @@ def make_posix(l, user):
     user.uidNumber = uid_number
     user.save()
 
-    group = l.get_entry('cn={},ou=posix,ou=groups,{}'.format(one(user.netFederezUID), settings.LDAP_BASE))
+    group = l.get_entry('cn={},ou=posix,ou=groups,{}'
+                        .format(one(user.netFederezUID), settings.LDAP_BASE))
     group.objectClass = 'posixGroup'
     group.cn = one(user.netFederezUID)
     group.gidNumber = uid_number
     group.memberUid = one(user.netFederezUID)
     group.save()
+
 
 @connect_ldap
 def enable_ssh(request, l, uid, user_uid):
@@ -324,7 +340,7 @@ def enable_ssh(request, l, uid, user_uid):
         return HttpResponseRedirect('/org/{}'.format(uid))
 
     # Ensure the user has POSIX and netFederezUser attributes
-    if not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
+    if user.dn not in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
         posix = make_posix(l, user)
         if posix is not None:
             messages.error(request, posix)
@@ -335,6 +351,7 @@ def enable_ssh(request, l, uid, user_uid):
 
     messages.success(request, '{} a désormais des accès SSH'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
+
 
 @connect_ldap
 def disable_ssh(request, l, uid, user_uid):
@@ -351,6 +368,7 @@ def disable_ssh(request, l, uid, user_uid):
     messages.success(request, '{} n\'a plus d\'accès SSH'.format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
 
+
 @connect_ldap
 def enable_admin(request, l, uid, user_uid):
     user = l.get_entry('uid={},ou=users,{}'.format(user_uid, settings.LDAP_BASE))
@@ -361,7 +379,7 @@ def enable_admin(request, l, uid, user_uid):
         messages.error(request, 'Vous n\'êtes pas admin')
         return HttpResponseRedirect('/org/{}'.format(uid))
 
-    if not user.dn in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
+    if user.dn not in [us.dn for us in l.search('(objectClass=netFederezUser)')]:
         messages.error(request, 'Il faut ajouter le membre au groupe ssh avant')
         return HttpResponseRedirect('/org/{}'.format(uid))
 
@@ -371,8 +389,11 @@ def enable_admin(request, l, uid, user_uid):
     admin.roleOccupant.add(user.dn)
     admin.save()
 
-    messages.success(request, '{} est désormais admin et a des accès sudo sur les serveurs'.format(user.displayName))
+    messages.success(request,
+                     '{} est désormais admin et a des accès sudo sur les serveurs'
+                     .format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
+
 
 @connect_ldap
 def disable_admin(request, l, uid, user_uid):
@@ -390,8 +411,11 @@ def disable_admin(request, l, uid, user_uid):
     admin.roleOccupant.discard(user.dn)
     admin.save()
 
-    messages.success(request, '{} n\'est plus admin et ses accès ssh sudo ont été révoqués'.format(user.displayName))
+    messages.success(request,
+                     '{} n\'est plus admin et ses accès ssh sudo ont été révoqués'
+                     .format(user.displayName))
     return HttpResponseRedirect('/org/{}'.format(uid))
+
 
 @connect_ldap
 def admin(request, l):
@@ -408,8 +432,9 @@ def admin(request, l):
         'is_owner': me.dn in org.owner,
     } for org in search]
 
-    return render_to_response('main/admin.html', { 'orgs': orgs },
+    return render_to_response('main/admin.html', {'orgs': orgs},
                               context_instance=RequestContext(request))
+
 
 def passwd(request):
     if request.method == 'POST':
@@ -433,7 +458,7 @@ def passwd(request):
                 c = Context({
                     'name': user.displayName,
                     'url': request.build_absolute_uri(
-                        reverse(process, kwargs={ 'token': req.token })),
+                        reverse(process, kwargs={'token': req.token})),
                     'expire_in': settings.REQ_EXPIRE_STR,
                 })
                 send_mail('Changement de mot de passe FedeRez', t.render(c),
@@ -442,7 +467,8 @@ def passwd(request):
     else:
         f = RequestPasswdForm(label_suffix='')
 
-    return form({ 'form': f }, 'main/passwd.html', request)
+    return form({'form': f}, 'main/passwd.html', request)
+
 
 def process(request, token):
     valid_reqs = Request.objects.filter(expires_at__gt=timezone.now())
@@ -457,14 +483,15 @@ def process(request, token):
     else:
         return error(request, 'Entrée incorrecte, contactez un admin')
 
+
 def process_account(request, req):
     if request.method != 'POST':
         f = ProcessAccountForm(label_suffix='')
-        return form({ 'form': f }, 'main/process_account.html', request)
+        return form({'form': f}, 'main/process_account.html', request)
 
     f = ProcessAccountForm(request.POST)
     if not f.is_valid():
-        return form({ 'form': f }, 'main/process_account.html', request)
+        return form({'form': f}, 'main/process_account.html', request)
 
     l = ldapom.LDAPConnection(uri=settings.LDAP_URI,
                               base=settings.LDAP_BASE,
@@ -481,35 +508,35 @@ def process_account(request, req):
     user.displayName = req.name
     user.mail = req.email
     user.cn = f.cleaned_data['nick']
-    user.sn = 'CHANGEIT!' # TODO
+    user.sn = 'CHANGEIT!'  # TODO
 
     try:
         user.save()
     except ldapom.error.LDAPError:
         messages.error(request, 'Pseudo déjà pris ?')
-        return form({ 'form': f }, 'main/process_account.html', request)
+        return form({'form': f}, 'main/process_account.html', request)
 
     try:
         user.set_password(f.cleaned_data['passwd'])
     except ldapom.error.LDAPError:
         user.delete()
         messages.error(request, 'Mot de passe trop court ?')
-        return form({ 'form': f }, 'main/process_account.html', request)
+        return form({'form': f}, 'main/process_account.html', request)
 
     if req.org_uid:
-        org = l.get_entry('o={},ou=associations,{}' \
+        org = l.get_entry('o={},ou=associations,{}'
                           .format(req.org_uid, settings.LDAP_BASE))
         org.uniqueMember.add(user.dn)
         org.save()
 
     for group in settings.LDAP_DEFAULT_GROUPS:
-        group = l.get_entry('cn={},ou=accesses,ou=groups,{}' \
+        group = l.get_entry('cn={},ou=accesses,ou=groups,{}'
                             .format(group, settings.LDAP_BASE))
         group.uniqueMember.add(user.dn)
         group.save()
 
     for role in settings.LDAP_DEFAULT_ROLES:
-        role = l.get_entry('cn={},ou=roles,{}' \
+        role = l.get_entry('cn={},ou=roles,{}'
                            .format(role, settings.LDAP_BASE))
         role.roleOccupant.add(user.dn)
         role.save()
@@ -517,6 +544,7 @@ def process_account(request, req):
     req.delete()
     messages.success(request, 'Compte créé')
     return HttpResponseRedirect('/')
+
 
 @sensitive_post_parameters()
 def process_passwd(request, req):
@@ -536,7 +564,8 @@ def process_passwd(request, req):
     else:
         f = ProcessPasswdForm(label_suffix='')
 
-    return form({ 'form': f }, 'main/process_passwd.html', request)
+    return form({'form': f}, 'main/process_passwd.html', request)
+
 
 @connect_ldap
 def process_email(request, l, req):
@@ -544,7 +573,7 @@ def process_email(request, l, req):
 
     # User who requested email change must be logged in
     if request.session['ldap_binddn'] != request_dn:
-        return logout(request, next=reverse(process, kwargs={ 'token': req.token }))
+        return logout(request, next=reverse(process, kwargs={'token': req.token}))
 
     user = l.get_entry(request.session['ldap_binddn'])
     user.mail = req.email
@@ -553,6 +582,7 @@ def process_email(request, l, req):
     messages.success(request, 'Email confirmé')
 
     return HttpResponseRedirect('/')
+
 
 def help(request):
     return render_to_response('main/help.html', context_instance=RequestContext(request))
